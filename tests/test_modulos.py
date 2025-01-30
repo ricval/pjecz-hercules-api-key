@@ -1,5 +1,5 @@
 """
-Unit tests for usuarios
+Unit tests for modulos
 """
 
 import unittest
@@ -9,16 +9,16 @@ import requests
 from tests import config
 
 
-class TestUsuarios(unittest.TestCase):
-    """Tests for usuarios"""
+class TestModulos(unittest.TestCase):
+    """Tests for modulos"""
 
-    def test_get_usuarios(self):
-        """Test GET method for usuarios"""
+    def test_get_modulos(self):
+        """Test GET method for modulos"""
 
-        # Consultar usuarios
+        # Consultar modulos
         try:
             response = requests.get(
-                f"{config['api_base_url']}/api/v5/usuarios",
+                f"{config['api_base_url']}/api/v5/modulos",
                 headers={"X-Api-Key": config["api_key"]},
                 timeout=config["timeout"],
             )

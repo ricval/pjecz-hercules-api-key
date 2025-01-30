@@ -14,7 +14,7 @@ from ..models.modulos import Modulo
 from ..models.permisos import Permiso
 from ..schemas.modulos import ModuloOut
 
-modulos = APIRouter(prefix="/v4/modulos", tags=["usuarios"])
+modulos = APIRouter(prefix="/api/v5/modulos", tags=["usuarios"])
 
 
 @modulos.get("", response_model=CustomPage[ModuloOut])

@@ -15,7 +15,7 @@ from ..models.permisos import Permiso
 from ..models.roles import Rol
 from ..schemas.permisos import PermisoOut
 
-permisos = APIRouter(prefix="/v4/permisos", tags=["usuarios"])
+permisos = APIRouter(prefix="/api/v5/permisos", tags=["usuarios"])
 
 
 @permisos.get("", response_model=CustomPage[PermisoOut])

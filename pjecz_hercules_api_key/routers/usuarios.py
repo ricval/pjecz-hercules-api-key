@@ -16,7 +16,7 @@ from ..models.permisos import Permiso
 from ..models.usuarios import Usuario
 from ..schemas.usuarios import OneUsuarioOut, UsuarioOut
 
-usuarios = APIRouter(prefix="/v4/usuarios", tags=["usuarios"])
+usuarios = APIRouter(prefix="/api/v5/usuarios", tags=["usuarios"])
 
 
 @usuarios.get("/{email}", response_model=OneUsuarioOut)

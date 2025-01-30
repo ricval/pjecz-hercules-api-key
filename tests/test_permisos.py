@@ -1,5 +1,5 @@
 """
-Unit tests for usuarios
+Unit tests for permisos
 """
 
 import unittest
@@ -9,16 +9,16 @@ import requests
 from tests import config
 
 
-class TestUsuarios(unittest.TestCase):
-    """Tests for usuarios"""
+class TestPermisos(unittest.TestCase):
+    """Tests for permisos"""
 
-    def test_get_usuarios(self):
-        """Test GET method for usuarios"""
+    def test_get_permisos(self):
+        """Test GET method for permisos"""
 
-        # Consultar usuarios
+        # Consultar permisos
         try:
             response = requests.get(
-                f"{config['api_base_url']}/api/v5/usuarios",
+                f"{config['api_base_url']}/api/v5/permisos",
                 headers={"X-Api-Key": config["api_key"]},
                 timeout=config["timeout"],
             )

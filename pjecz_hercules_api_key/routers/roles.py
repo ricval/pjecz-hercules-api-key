@@ -14,7 +14,7 @@ from ..models.permisos import Permiso
 from ..models.roles import Rol
 from ..schemas.roles import RolOut
 
-roles = APIRouter(prefix="/v4/roles", tags=["usuarios"])
+roles = APIRouter(prefix="/api/v5/roles", tags=["usuarios"])
 
 
 @roles.get("", response_model=CustomPage[RolOut])

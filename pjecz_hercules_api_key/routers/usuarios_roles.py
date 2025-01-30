@@ -6,7 +6,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 from ..dependencies.authentications import UsuarioInDB, get_current_active_user
 from ..dependencies.database import Session, get_db
@@ -18,7 +17,7 @@ from ..models.usuarios import Usuario
 from ..models.usuarios_roles import UsuarioRol
 from ..schemas.usuarios_roles import UsuarioRolOut
 
-usuarios_roles = APIRouter(prefix="/v4/usuarios_roles", tags=["usuarios"])
+usuarios_roles = APIRouter(prefix="/api/v5/usuarios_roles", tags=["usuarios"])
 
 
 @usuarios_roles.get("", response_model=CustomPage[UsuarioRolOut])

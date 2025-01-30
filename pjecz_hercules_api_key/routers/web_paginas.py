@@ -17,7 +17,7 @@ from ..models.web_paginas import WebPagina
 from ..models.web_ramas import WebRama
 from ..schemas.web_paginas import OneWebPaginaOut, WebPaginaOut
 
-web_paginas = APIRouter(prefix="/v4/web_paginas", tags=["sitio web"])
+web_paginas = APIRouter(prefix="/api/v5/web_paginas", tags=["sitio web"])
 
 
 @web_paginas.get("/{clave}", response_model=OneWebPaginaOut)

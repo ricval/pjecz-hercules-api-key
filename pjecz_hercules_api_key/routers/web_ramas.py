@@ -16,7 +16,7 @@ from ..models.permisos import Permiso
 from ..models.web_ramas import WebRama
 from ..schemas.web_ramas import OneWebRamaOut, WebRamaOut
 
-web_ramas = APIRouter(prefix="/v4/web_ramas", tags=["sitio web"])
+web_ramas = APIRouter(prefix="/api/v5/web_ramas", tags=["sitio web"])
 
 
 @web_ramas.get("/{clave}", response_model=OneWebRamaOut)
