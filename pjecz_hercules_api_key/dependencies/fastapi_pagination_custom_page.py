@@ -1,47 +1,5 @@
 """
 FastAPI Pagination Custom Page
-
-Provides a custom pagination class to be used with FastAPI 0.100.0, Pydantic 2.0.2 and SQLAlchemy.
-
-Example of the output JSON:
-
-    {
-      "success": true,
-      "message": "Success",
-      "total": 116135,
-      "items": [
-        { ... },
-        { ... },
-        ...
-      ],
-      "limit": 10,
-      "offset": 0
-    }
-
-Usage:
-
-    from typing import Annotated
-
-    from fastapi import APIRouter, Depends
-    from fastapi_pagination.ext.sqlalchemy import paginate
-
-    from lib.fastapi_pagination_custom_page import CustomPage
-
-    from .crud import get_examples
-    from .schemas import ExampleOut
-
-    examples = APIRouter(prefix="/examples")
-
-    @examples.get("", response_model=CustomPage[ExampleOut])
-    async def list_examples(
-        database: Annotated[Session, Depends(get_db)],
-    ):
-        try:
-            query = get_examples(database=database)
-        except MyAnyError as error:
-            return CustomList(success=False, message=str(error))
-        return paginate(query)
-
 """
 
 from abc import ABC
@@ -73,9 +31,9 @@ class CustomPage(AbstractPage[T], Generic[T], ABC):
 
     success: bool
     message: str
+    data: Sequence[T] = None
 
     total: Optional[GreaterEqualZero] = None
-    items: Sequence[T] = None
     limit: Optional[GreaterEqualOne] = None
     offset: Optional[GreaterEqualZero] = None
 
@@ -96,15 +54,19 @@ class CustomPage(AbstractPage[T], Generic[T], ABC):
 
         if total is None or total == 0:
             return cls(
-                success=True,
+                success=False,
                 message="No se encontraron registros",
+                data=[],
+                total=0,
+                limit=raw_params.limit,
+                offset=raw_params.offset,
             )
 
         return cls(
             success=True,
             message="Success",
+            data=items,
             total=total,
-            items=items,
             limit=raw_params.limit,
             offset=raw_params.offset,
             **kwargs,

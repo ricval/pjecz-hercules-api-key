@@ -15,5 +15,7 @@ class WebRamaOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneWebRamaOut(WebRamaOut, OneBaseOut):
+class OneWebRamaOut(OneBaseOut):
     """Esquema para entregar una WebRama"""
+
+    data: WebRamaOut | None = None

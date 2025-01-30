@@ -1,5 +1,5 @@
 """
-Web Ramas v4, rutas (paths)
+Web Ramas v4
 """
 
 from typing import Annotated
@@ -31,14 +31,14 @@ async def detalle_web_rama(
     try:
         clave = safe_clave(clave)
     except ValueError:
-        return OneWebRamaOut(success=False, message="La clave no es válida")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave de la rama web")
     try:
         web_rama = database.query(WebRama).filter_by(clave=clave).one()
     except (MultipleResultsFound, NoResultFound):
-        return OneWebRamaOut(success=False, message="No existe esa rama")
+        return OneWebRamaOut(success=False, message="No existe esa rama web")
     if web_rama.estatus != "A":
-        return OneWebRamaOut(success=False, message="No es activa esa rama, está eliminada")
-    return OneWebRamaOut.model_validate(web_rama)
+        return OneWebRamaOut(success=False, message="No está habilitada esa rama web")
+    return OneWebRamaOut(success=True, message=f"Detalle de rama web {clave}", data=WebRamaOut.model_validate(web_rama))
 
 
 @web_ramas.get("", response_model=CustomPage[WebRamaOut])

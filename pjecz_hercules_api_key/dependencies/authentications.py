@@ -1,5 +1,5 @@
 """
-Autentificaciones
+Authentications
 """
 
 import re
@@ -52,12 +52,12 @@ def authenticate_user(
 ) -> UsuarioInDB:
     """Autentificar un usuario por su api_key"""
 
-    # Validar con expresion regular
+    # Validar con expresión regular
     api_key = unidecode(api_key)
     if re.match(API_KEY_REGEXP, api_key) is None:
         raise MyAuthenticationError("No paso la validacion por expresion regular")
 
-    # Separar el id, el email y la cadena aleatoria del api_key
+    # Separar el ID, el email y la cadena aleatoria del api_key
     api_key_id, api_key_email, _ = api_key.split(".")
 
     # Decodificar el ID
@@ -78,7 +78,7 @@ def authenticate_user(
     if api_key_email != Hashids(salt=usuario.email, min_length=8).encode(1):
         raise MyAuthenticationError("No coincide el correo electronico")
 
-    # Validar el tiempo de expiracion
+    # Validar el tiempo de expiración
     if usuario.api_key_expiracion < datetime.now():
         raise MyAuthenticationError("No vigente porque ya expiro")
 

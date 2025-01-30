@@ -13,18 +13,19 @@ class WebPaginaOut(BaseModel):
     """Esquema para items de WebPagina"""
 
     clave: str | None = None
-    titulo: str | None = None
-    resumen: str | None = None
-    ruta: str | None = None
+    contenido: str | None = None
+    etiquetas: str | None = None
+    estado: str | None = None
     fecha_modificacion: date | None = None
     responsable: str | None = None
-    etiquetas: str | None = None
+    resumen: str | None = None
+    ruta: str | None = None
+    titulo: str | None = None
     vista_previa: str | None = None
-    estado: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneWebPaginaOut(WebPaginaOut, OneBaseOut):
+class OneWebPaginaOut(OneBaseOut):
     """Esquema para entregar una WebPagina"""
 
-    contenido: str | None = None
+    data: WebPaginaOut | None = None

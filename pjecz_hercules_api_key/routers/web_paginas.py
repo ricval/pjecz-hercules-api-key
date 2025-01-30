@@ -1,5 +1,5 @@
 """
-Web Paginas v4, rutas (paths)
+Web Paginas v4
 """
 
 from typing import Annotated
@@ -32,34 +32,30 @@ async def detalle_web_pagina(
     try:
         clave = safe_clave(clave)
     except ValueError:
-        return OneWebPaginaOut(success=False, message="La clave no es válida")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave")
     try:
         web_pagina = database.query(WebPagina).filter_by(clave=clave).one()
     except (MultipleResultsFound, NoResultFound):
-        return OneWebPaginaOut(success=False, message="No existe esa página")
+        return OneWebPaginaOut(success=False, message="No existe esa página web")
     if web_pagina.estatus != "A":
-        return OneWebPaginaOut(success=False, message="No es activa esa página, está eliminada")
-    return OneWebPaginaOut.model_validate(web_pagina)
+        return OneWebPaginaOut(success=False, message="No está habilitada esa página web")
+    return OneWebPaginaOut(success=True, message=f"Detalle de página web {clave}", data=WebPaginaOut.model_validate(web_pagina))
 
 
 @web_paginas.get("", response_model=CustomPage[WebPaginaOut])
 async def paginado_web_paginas(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
-    clave: str = None,
+    web_rama_clave: str = None,
 ):
     """Paginado de WebPagina"""
     if current_user.permissions.get("WEB PAGINAS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     consulta = database.query(WebPagina)
-    if clave is not None:
+    if web_rama_clave is not None:
         try:
-            clave = safe_clave(clave)
+            web_rama_clave = safe_clave(web_rama_clave)
         except ValueError:
-            return CustomPage(success=False, message="La clave no es válida")
-        try:
-            web_rama = database.query(WebRama).filter_by(clave=clave).filter_by(estatus="A").one()
-            consulta = consulta.filter_by(web_rama_id=web_rama.id)
-        except (MultipleResultsFound, NoResultFound):
-            return CustomPage(success=False, message="No existe esa rama o está eliminada")
-    return paginate(consulta.filter_by(estatus="A").order_by(WebPagina.clave))
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave de la rama web")
+        consulta = consulta.join(WebRama).filter(WebRama.clave == web_rama_clave).filter(WebRama.estatus == "A")
+    return paginate(consulta.filter(WebPagina.estatus == "A").order_by(WebPagina.clave))
