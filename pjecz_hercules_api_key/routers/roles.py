@@ -1,5 +1,5 @@
 """
-Roles v4, rutas (paths)
+Roles v4
 """
 
 from typing import Annotated
@@ -12,26 +12,9 @@ from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..models.permisos import Permiso
 from ..models.roles import Rol
-from ..schemas.roles import OneRolOut, RolOut
+from ..schemas.roles import RolOut
 
-roles = APIRouter(prefix="/v4/roles", tags=["usuarios"])
-
-
-@roles.get("/{rol_id}", response_model=OneRolOut)
-async def detalle_rol(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
-    database: Annotated[Session, Depends(get_db)],
-    rol_id: int,
-):
-    """Detalle de un rol a partir de su id"""
-    if current_user.permissions.get("ROLES", 0) < Permiso.VER:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    rol = database.query(Rol).get(rol_id)
-    if rol is None:
-        return OneRolOut(success=False, message="No existe ese rol")
-    if rol.estatus != "A":
-        return OneRolOut(success=False, message="No es activo ese rol, está eliminado")
-    return OneRolOut.model_validate(rol)
+roles = APIRouter(prefix="/api/v5/roles", tags=["usuarios"])
 
 
 @roles.get("", response_model=CustomPage[RolOut])

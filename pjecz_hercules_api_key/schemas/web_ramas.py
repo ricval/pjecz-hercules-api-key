@@ -10,10 +10,13 @@ from ..dependencies.schemas_base import OneBaseOut
 class WebRamaOut(BaseModel):
     """Esquema para entregar WebRama"""
 
+    id: int | None = None
     clave: str | None = None
     nombre: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneWebRamaOut(WebRamaOut, OneBaseOut):
+class OneWebRamaOut(OneBaseOut):
     """Esquema para entregar una WebRama"""
+
+    data: WebRamaOut | None = None

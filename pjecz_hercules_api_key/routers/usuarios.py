@@ -1,5 +1,5 @@
 """
-Usuarios v4, rutas (paths)
+Usuarios v4
 """
 
 from typing import Annotated
@@ -16,7 +16,7 @@ from ..models.permisos import Permiso
 from ..models.usuarios import Usuario
 from ..schemas.usuarios import OneUsuarioOut, UsuarioOut
 
-usuarios = APIRouter(prefix="/v4/usuarios", tags=["usuarios"])
+usuarios = APIRouter(prefix="/api/v5/usuarios", tags=["usuarios"])
 
 
 @usuarios.get("/{email}", response_model=OneUsuarioOut)
@@ -31,14 +31,14 @@ async def detalle_usuario(
     try:
         email = safe_email(email)
     except ValueError:
-        return OneUsuarioOut(success=False, message="El email no es válido")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válido el e-mail")
     try:
         usuario = database.query(Usuario).filter_by(email=email).one()
     except (MultipleResultsFound, NoResultFound):
         return OneUsuarioOut(success=False, message="No existe ese usuario")
     if usuario.estatus != "A":
-        return OneUsuarioOut(success=False, message="No es activo ese usuario, está eliminado")
-    return OneUsuarioOut.model_validate(usuario)
+        return OneUsuarioOut(success=False, message="No está habilitado ese usuario")
+    return OneUsuarioOut(success=True, message=f"Detalle de {email}", data=UsuarioOut.model_validate(usuario))
 
 
 @usuarios.get("", response_model=CustomPage[UsuarioOut])
@@ -66,10 +66,10 @@ async def paginado_usuarios(
         try:
             email = safe_email(email, search_fragment=True)
         except ValueError:
-            return CustomPage(success=False, message="El email no es válido")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válido el e-mail")
         consulta = consulta.filter(Usuario.email.contains(email))
     if nombres is not None:
         nombres = safe_string(nombres)
         if nombres != "":
             consulta = consulta.filter(Usuario.nombres.contains(nombres))
-    return paginate(consulta.filter_by(estatus="A").order_by(Usuario.email))
+    return paginate(consulta.filter(Usuario.estatus == "A").order_by(Usuario.email))

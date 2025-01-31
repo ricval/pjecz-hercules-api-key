@@ -1,5 +1,5 @@
 """
-Permisos v4, rutas (paths)
+Permisos v4
 """
 
 from typing import Annotated
@@ -13,26 +13,9 @@ from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..models.modulos import Modulo
 from ..models.permisos import Permiso
 from ..models.roles import Rol
-from ..schemas.permisos import OnePermisoOut, PermisoOut
+from ..schemas.permisos import PermisoOut
 
-permisos = APIRouter(prefix="/v4/permisos", tags=["usuarios"])
-
-
-@permisos.get("/{permiso_id}", response_model=OnePermisoOut)
-async def detalle_permiso(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
-    database: Annotated[Session, Depends(get_db)],
-    permiso_id: int,
-):
-    """Detalle de una permisos a partir de su id"""
-    if current_user.permissions.get("PERMISOS", 0) < Permiso.VER:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    permiso = database.query(Permiso).get(permiso_id)
-    if permiso is None:
-        return OnePermisoOut(success=False, message="No existe ese permiso")
-    if permiso.estatus != "A":
-        return OnePermisoOut(success=False, message="No es activo ese permiso, está eliminado")
-    return OnePermisoOut.model_validate(permiso)
+permisos = APIRouter(prefix="/api/v5/permisos", tags=["usuarios"])
 
 
 @permisos.get("", response_model=CustomPage[PermisoOut])
@@ -47,17 +30,7 @@ async def paginado_permisos(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     consulta = database.query(Permiso)
     if modulo_id is not None:
-        modulo = database.query(Modulo).get(modulo_id)
-        if modulo is None:
-            return CustomPage(success=False, message="No existe ese módulo")
-        if modulo.estatus != "A":
-            return CustomPage(success=False, message="No es activo ese módulo, está eliminado")
-        consulta = consulta.filter_by(modulo_id=modulo.id)
+        consulta = consulta.join(Modulo).filter(Modulo.id == modulo_id).filter(Modulo.estatus == "A")
     if rol_id is not None:
-        rol = database.query(Rol).get(rol_id)
-        if rol is None:
-            return CustomPage(success=False, message="No existe ese rol")
-        if rol.estatus != "A":
-            return CustomPage(success=False, message="No es activo ese rol, está eliminado")
-        consulta = consulta.filter_by(rol_id=rol.id)
-    return paginate(consulta.filter_by(estatus="A").order_by(Permiso.id.desc()))
+        consulta = consulta.join(Rol).filter(Rol.id == rol_id).filter(Rol.estatus == "A")
+    return paginate(consulta.filter(Permiso.estatus == "A").order_by(Permiso.id.desc()))

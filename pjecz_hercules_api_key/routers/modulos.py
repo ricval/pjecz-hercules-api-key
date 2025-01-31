@@ -1,5 +1,5 @@
 """
-Modulos v4, rutas (paths)
+Modulos v4
 """
 
 from typing import Annotated
@@ -12,26 +12,9 @@ from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..models.modulos import Modulo
 from ..models.permisos import Permiso
-from ..schemas.modulos import ModuloOut, OneModuloOut
+from ..schemas.modulos import ModuloOut
 
-modulos = APIRouter(prefix="/v4/modulos", tags=["usuarios"])
-
-
-@modulos.get("/{modulo_id}", response_model=OneModuloOut)
-async def detalle_modulo(
-    current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
-    database: Annotated[Session, Depends(get_db)],
-    modulo_id: int,
-):
-    """Detalle de un módulo a partir de su id"""
-    if current_user.permissions.get("MODULOS", 0) < Permiso.VER:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    modulo = database.query(Modulo).get(modulo_id)
-    if modulo is None:
-        return OneModuloOut(success=False, message="No existe ese módulo")
-    if modulo.estatus != "A":
-        return OneModuloOut(success=False, message="No es activo ese módulo, está eliminado")
-    return OneModuloOut.model_validate(modulo)
+modulos = APIRouter(prefix="/api/v5/modulos", tags=["usuarios"])
 
 
 @modulos.get("", response_model=CustomPage[ModuloOut])
