@@ -13,9 +13,9 @@ class TestSitioWeb(unittest.TestCase):
     """Tests for web ramas"""
 
     def test_get_web_ramas(self):
-        """Test GET method for ramas"""
+        """Test GET method for web ramas"""
 
-        # Consultar web ramas
+        # Consultar
         try:
             response = requests.get(
                 f"{config['api_base_url']}/api/v5/web_ramas",
@@ -35,17 +35,18 @@ class TestSitioWeb(unittest.TestCase):
         # Validar que se haya tenido éxito
         self.assertEqual(contenido["success"], True)
 
-        # Validar que en los datos haya el listado de autoridades
+        # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
-        # self.assertEqual("clave" in item, True)
-        # self.assertEqual("nombre" in item, True)
+        for item in contenido["data"]:
+            self.assertEqual("clave" in item, True)
+            self.assertEqual("nombre" in item, True)
 
     def test_get_web_rama_by_clave(self):
-        """Test GET method for rama by clave"""
+        """Test GET method for web rama by clave"""
 
-        # Bucle por claves de ramas
-        for clave in ["AC", "CO", "EN", "OJ", "SE", "TR"]:
-            # Consultar rama por clave
+        # Bucle por claves
+        for clave in config["web_ramas_claves"]:
+            # Consultar
             try:
                 response = requests.get(
                     f"{config['api_base_url']}/api/v5/web_ramas/{clave}",
@@ -66,9 +67,11 @@ class TestSitioWeb(unittest.TestCase):
             self.assertEqual(contenido["success"], True)
 
             # Validar los datos
-            # self.assertEqual(type(contenido["data"]), list)
-            # self.assertEqual(contenido["clave"] == clave, True)
-            # self.assertEqual("nombre" in contenido, True)
+            self.assertEqual(type(contenido["data"]), dict)
+            item = contenido["data"]
+            self.assertEqual("clave" in item, True)
+            self.assertEqual(item["clave"] == clave, True)
+            self.assertEqual("nombre" in item, True)
 
 
 if __name__ == "__main__":

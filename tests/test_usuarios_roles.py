@@ -13,9 +13,9 @@ class TestUsuariosRoles(unittest.TestCase):
     """Tests for usuarios-roles"""
 
     def test_get_usuarios_roles(self):
-        """Test GET method for usuarios_roles"""
+        """Test GET method for usuarios-roles"""
 
-        # Consultar usuarios-roles
+        # Consultar
         try:
             response = requests.get(
                 f"{config['api_base_url']}/api/v5/usuarios_roles",
@@ -37,6 +37,15 @@ class TestUsuariosRoles(unittest.TestCase):
 
         # Validar que en los datos haya el listado de autoridades
         self.assertEqual(type(contenido["data"]), list)
+
+        # Validar los datos
+        self.assertEqual(type(contenido["data"]), list)
+        for item in contenido["data"]:
+            self.assertEqual("rol_id" in item, True)
+            self.assertEqual("rol_nombre" in item, True)
+            self.assertEqual("usuario_id" in item, True)
+            self.assertEqual("usuario_nombre" in item, True)
+            self.assertEqual("descripcion" in item, True)
 
 
 if __name__ == "__main__":

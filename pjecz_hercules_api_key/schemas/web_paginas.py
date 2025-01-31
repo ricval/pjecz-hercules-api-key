@@ -12,6 +12,7 @@ from ..dependencies.schemas_base import OneBaseOut
 class WebPaginaOut(BaseModel):
     """Esquema para items de WebPagina"""
 
+    id: int | None = None
     clave: str | None = None
     contenido: str | None = None
     etiquetas: str | None = None

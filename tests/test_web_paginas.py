@@ -13,9 +13,9 @@ class TestSitioWeb(unittest.TestCase):
     """Tests for web paginas"""
 
     def test_get_web_paginas(self):
-        """Test GET method for paginas"""
+        """Test GET method for web paginas"""
 
-        # Consultar web paginas
+        # Consultar
         try:
             response = requests.get(
                 f"{config['api_base_url']}/api/v5/web_paginas",
@@ -35,24 +35,26 @@ class TestSitioWeb(unittest.TestCase):
         # Validar que se haya tenido éxito
         self.assertEqual(contenido["success"], True)
 
-        # Validar que en los datos haya el listado de autoridades
+        # Validar los datos
         self.assertEqual(type(contenido["data"]), list)
-        # self.assertEqual("clave" in item, True)
-        # self.assertEqual("titulo" in item, True)
-        # self.assertEqual("resumen" in item, True)
-        # self.assertEqual("ruta" in item, True)
-        # self.assertEqual("fecha_modificacion" in item, True)
-        # self.assertEqual("responsable" in item, True)
-        # self.assertEqual("etiquetas" in item, True)
-        # self.assertEqual("vista_previa" in item, True)
-        # self.assertEqual("estado" in item, True)
+        for item in contenido["data"]:
+            self.assertEqual("clave" in item, True)
+            self.assertEqual("contenido" in item, True)
+            self.assertEqual("etiquetas" in item, True)
+            self.assertEqual("estado" in item, True)
+            self.assertEqual("fecha_modificacion" in item, True)
+            self.assertEqual("responsable" in item, True)
+            self.assertEqual("resumen" in item, True)
+            self.assertEqual("ruta" in item, True)
+            self.assertEqual("titulo" in item, True)
+            self.assertEqual("vista_previa" in item, True)
 
     def test_get_web_pagina_by_clave(self):
-        """Test GET method for pagina by clave"""
+        """Test GET method for web pagina by clave"""
 
-        # Bucle por claves de paginas web
-        for clave in ["AC20241004", "CN20231019", "NT20240808", "SEPTSJ202431SO"]:
-            # Consultar pagina web por clave
+        # Bucle por claves
+        for clave in config["web_paginas_claves"]:
+            # Consultar
             try:
                 response = requests.get(
                     f"{config['api_base_url']}/api/v5/web_paginas/{clave}",
@@ -73,17 +75,19 @@ class TestSitioWeb(unittest.TestCase):
             self.assertEqual(contenido["success"], True)
 
             # Validar los datos
-            # self.assertEqual(type(contenido["data"]), list)
-            # self.assertEqual(contenido["clave"] == clave, True)
-            # self.assertEqual("titulo" in contenido, True)
-            # self.assertEqual("resumen" in contenido, True)
-            # self.assertEqual("ruta" in contenido, True)
-            # self.assertEqual("fecha_modificacion" in contenido, True)
-            # self.assertEqual("responsable" in contenido, True)
-            # self.assertEqual("etiquetas" in contenido, True)
-            # self.assertEqual("vista_previa" in contenido, True)
-            # self.assertEqual("estado" in contenido, True)
-            # self.assertEqual("contenido" in contenido, True)
+            self.assertEqual(type(contenido["data"]), dict)
+            item = contenido["data"]
+            self.assertEqual("clave" in item, True)
+            self.assertEqual(item["clave"] == clave, True)
+            self.assertEqual("contenido" in item, True)
+            self.assertEqual("etiquetas" in item, True)
+            self.assertEqual("estado" in item, True)
+            self.assertEqual("fecha_modificacion" in item, True)
+            self.assertEqual("responsable" in item, True)
+            self.assertEqual("resumen" in item, True)
+            self.assertEqual("ruta" in item, True)
+            self.assertEqual("titulo" in item, True)
+            self.assertEqual("vista_previa" in item, True)
 
 
 if __name__ == "__main__":
