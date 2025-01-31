@@ -1,5 +1,5 @@
 """
-PJECZ Plataforma Web API Key
+PJECZ Hércules API Key
 """
 
 from fastapi import FastAPI
@@ -17,8 +17,8 @@ from .settings import get_settings
 
 # FastAPI
 app = FastAPI(
-    title="PJECZ Hércules API Key",
-    description="API con autentificación para construir el sitio web.",
+    title="API del Poder Judicial del Estado de Coahuila de Zaragoza",
+    description="Para consultar la base de datos 'Plataforma Web'. Solicitudes a informatica en pjecz.gob.mx.",
     docs_url="/docs",
     redoc_url=None,
 )
@@ -50,4 +50,4 @@ add_pagination(app)
 @app.get("/")
 async def root():
     """Mensaje de Bienvenida"""
-    return {"message": "API con autentificación para realizar operaciones con la base de datos de Plataforma Web."}
+    return {"message": "API del Poder Judicial del Estado de Coahuila de Zaragoza. Solicitudes a informatica en pjecz.gob.mx."}
