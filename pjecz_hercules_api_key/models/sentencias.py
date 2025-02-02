@@ -37,8 +37,8 @@ class Sentencia(Base, UniversalMixin):
     fecha: Mapped[date] = mapped_column(index=True)
     descripcion: Mapped[str] = mapped_column(String(1024))
     es_perspectiva_genero: Mapped[bool] = mapped_column(default=False)
-    archivo: Mapped[str] = mapped_column(String(256), default="", server_default="")
-    url: Mapped[str] = mapped_column(String(512), default="", server_default="")
+    archivo: Mapped[str] = mapped_column(String(256), default="")
+    url: Mapped[str] = mapped_column(String(512), default="")
 
     # Columnas para Retrieval-Augmented Generation (RAG)
     rag_fue_analizado_tiempo: Mapped[Optional[datetime]]

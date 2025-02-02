@@ -2,9 +2,10 @@
 Edictos, modelos
 """
 
-from datetime import date
+from datetime import date, datetime
+from typing import Optional
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import JSON, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..dependencies.database import Base
@@ -29,8 +30,17 @@ class Edicto(Base, UniversalMixin):
     descripcion: Mapped[str] = mapped_column(String(256))
     expediente: Mapped[str] = mapped_column(String(16))
     numero_publicacion: Mapped[str] = mapped_column(String(16))
-    archivo: Mapped[str] = mapped_column(String(256), default="", server_default="")
-    url: Mapped[str] = mapped_column(String(512), default="", server_default="")
+    archivo: Mapped[str] = mapped_column(String(256), default="")
+    url: Mapped[str] = mapped_column(String(512), default="")
+    es_declaracion_de_ausencia: Mapped[bool] = mapped_column(default=False)
+
+    # Columnas para Retrieval-Augmented Generation (RAG)
+    rag_fue_analizado_tiempo: Mapped[Optional[datetime]]
+    rag_analisis: Mapped[Optional[dict]] = mapped_column(JSON)
+    rag_fue_sintetizado_tiempo: Mapped[Optional[datetime]]
+    rag_sintesis: Mapped[Optional[dict]] = mapped_column(JSON)
+    rag_fue_categorizado_tiempo: Mapped[Optional[datetime]]
+    rag_categorias: Mapped[Optional[dict]] = mapped_column(JSON)
 
     @property
     def distrito_clave(self):

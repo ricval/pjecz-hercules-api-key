@@ -1,5 +1,5 @@
 """
-Usuarios v4, esquemas de pydantic
+Usuarios, esquemas de pydantic
 """
 
 from datetime import datetime
@@ -12,12 +12,12 @@ from ..dependencies.schemas_base import OneBaseOut
 class UsuarioOut(BaseModel):
     """Esquema para entregar usuarios"""
 
-    id: int | None = None
-    email: str | None = None
-    nombres: str | None = None
-    apellido_paterno: str | None = None
-    apellido_materno: str | None = None
-    puesto: str | None = None
+    id: int
+    email: str
+    nombres: str
+    apellido_paterno: str
+    apellido_materno: str
+    puesto: str
     model_config = ConfigDict(from_attributes=True)
 
 
