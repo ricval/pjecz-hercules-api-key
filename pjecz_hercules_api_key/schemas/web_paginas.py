@@ -15,14 +15,14 @@ class WebPaginaOut(BaseModel):
     id: int
     clave: str
     contenido: str
-    etiquetas: str
+    etiquetas: str | None = None
     estado: str
     fecha_modificacion: date
-    responsable: str
-    resumen: str
+    responsable: str | None = None
+    resumen: str | None = None
     ruta: str
     titulo: str
-    vista_previa: str
+    vista_previa: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
 

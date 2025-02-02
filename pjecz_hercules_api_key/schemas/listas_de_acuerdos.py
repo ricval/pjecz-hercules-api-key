@@ -21,8 +21,6 @@ class ListaDeAcuerdoOut(BaseModel):
     autoridad_descripcion_corta: str
     fecha: date
     descripcion: str
-    archivo: str = ""
-    url: str = ""
     model_config = ConfigDict(from_attributes=True)
 
 
