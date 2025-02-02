@@ -1,5 +1,5 @@
 """
-Usuarios v4
+Usuarios
 """
 
 from typing import Annotated

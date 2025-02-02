@@ -1,5 +1,5 @@
 """
-Web Paginas v4
+Web Paginas
 """
 
 from typing import Annotated
