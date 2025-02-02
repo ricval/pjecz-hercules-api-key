@@ -4,7 +4,6 @@ Materias, modelos
 
 from typing import List
 
-from models.materias_tipos_juicios import MateriaTipoJuicio
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

@@ -5,7 +5,6 @@ Sentencias, modelos
 from datetime import date, datetime
 from typing import Optional
 
-from models.materias_tipos_juicios import MateriaTipoJuicio
 from sqlalchemy import JSON, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
