@@ -2,6 +2,7 @@
 Listas de Acuerdos
 """
 
+from datetime import date, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -43,6 +44,9 @@ async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     autoridad_clave: str = None,
+    creado: date = None,
+    creado_desde: date = None,
+    creado_hasta: date = None,
 ):
     """Paginado de listas_de_acuerdos"""
     if current_user.permissions.get("LISTAS DE ACUERDOS", 0) < Permiso.VER:
@@ -54,4 +58,16 @@ async def paginado(
         except ValueError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave")
         consulta = consulta.join(Autoridad).filter(Autoridad.clave == autoridad_clave).filter(Autoridad.estatus == "A")
+    if creado is not None:
+        consulta = consulta.filter(ListaDeAcuerdo.creado >= datetime(creado.year, creado.month, creado.day, 0, 0, 0))
+        consulta = consulta.filter(ListaDeAcuerdo.creado <= datetime(creado.year, creado.month, creado.day, 23, 59, 59))
+    else:
+        if creado_desde is not None:
+            consulta = consulta.filter(
+                ListaDeAcuerdo.creado >= datetime(creado_desde.year, creado_desde.month, creado_desde.day, 0, 0, 0)
+            )
+        if creado_hasta is not None:
+            consulta = consulta.filter(
+                ListaDeAcuerdo.creado <= datetime(creado_hasta.year, creado_hasta.month, creado_hasta.day, 23, 59, 59)
+            )
     return paginate(consulta.filter(ListaDeAcuerdo.estatus == "A").order_by(ListaDeAcuerdo.id.desc()))
