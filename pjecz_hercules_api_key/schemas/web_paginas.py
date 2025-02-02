@@ -1,5 +1,5 @@
 """
-Web Paginas v4, esquemas de pydantic
+Web Paginas, esquemas de pydantic
 """
 
 from datetime import date
@@ -12,16 +12,16 @@ from ..dependencies.schemas_base import OneBaseOut
 class WebPaginaOut(BaseModel):
     """Esquema para items de WebPagina"""
 
-    id: int | None = None
-    clave: str | None = None
-    contenido: str | None = None
+    id: int
+    clave: str
+    contenido: str
     etiquetas: str | None = None
-    estado: str | None = None
-    fecha_modificacion: date | None = None
+    estado: str
+    fecha_modificacion: date
     responsable: str | None = None
     resumen: str | None = None
-    ruta: str | None = None
-    titulo: str | None = None
+    ruta: str
+    titulo: str
     vista_previa: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
