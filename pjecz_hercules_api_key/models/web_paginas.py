@@ -1,5 +1,5 @@
 """
-Web Paginas, modelos
+Web Páginas, modelos
 """
 
 from datetime import date, datetime
@@ -45,9 +45,6 @@ class WebPagina(Base, UniversalMixin):
     tiempo_publicar: Mapped[Optional[datetime]]
     tiempo_archivar: Mapped[Optional[datetime]]
 
-    # Hijos
-    # web_archivos: Mapped[List["WebArchivo"]] = relationship("WebArchivo", back_populates="web_pagina")
-
     def __repr__(self):
         """Representación"""
-        return f"<WebPagina clave {self.clave}, titulo {self.titulo}, ruta {self.ruta}, fecha de modificacion {self.fecha_modificacion}, estado {self.estado}>"
+        return f"<WebPagina clave {self.clave}>"

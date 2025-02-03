@@ -10,7 +10,6 @@ from ..dependencies.schemas_base import OneBaseOut
 class MateriaOut(BaseModel):
     """Esquema para entregar materias"""
 
-    id: int
     clave: str
     nombre: str
     descripcion: str

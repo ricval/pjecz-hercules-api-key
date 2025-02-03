@@ -19,6 +19,10 @@ class SentenciaOut(BaseModel):
     autoridad_clave: str
     autoridad_descripcion: str
     autoridad_descripcion_corta: str
+    materia_clave: str
+    materia_nombre: str
+    materia_tipo_juicio_id: int
+    materia_tipo_juicio_descripcion: str
     sentencia: str
     sentencia_fecha: date | None = None
     expediente: str
@@ -27,17 +31,17 @@ class SentenciaOut(BaseModel):
     fecha: date
     descripcion: str
     es_perspectiva_genero: bool
+    rag_fue_analizado_tiempo: datetime | None = None
+    rag_fue_sintetizado_tiempo: datetime | None = None
+    rag_fue_categorizado_tiempo: datetime | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
 class SentenciaRAGOut(SentenciaOut):
     """Agregar los campos RAG para cuando se entrega una sentencia"""
 
-    rag_fue_analizado_tiempo: datetime | None = None
     rag_analisis: dict | None = None
-    rag_fue_sintetizado_tiempo: datetime | None = None
     rag_sintesis: dict | None = None
-    rag_fue_categorizado_tiempo: datetime | None = None
     rag_categorias: dict | None = None
 
 

@@ -16,6 +16,19 @@ class AutoridadOut(BaseModel):
     distrito_nombre_corto: str
     materia_clave: str
     materia_nombre: str
+    descripcion: str
+    descripcion_corta: str
+    directorio_edictos: str
+    directorio_glosas: str
+    directorio_listas_de_acuerdos: str
+    directorio_sentencias: str
+    es_extinto: bool
+    es_cemasc: bool
+    es_defensoria: bool
+    es_jurisdiccional: bool
+    es_notaria: bool
+    es_organo_especializado: bool
+    organo_jurisdiccional: str
     model_config = ConfigDict(from_attributes=True)
 
 
