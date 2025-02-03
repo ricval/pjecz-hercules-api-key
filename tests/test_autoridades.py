@@ -44,6 +44,19 @@ class TestAutoridades(unittest.TestCase):
             self.assertEqual("distrito_nombre_corto" in item, True)
             self.assertEqual("materia_clave" in item, True)
             self.assertEqual("materia_nombre" in item, True)
+            self.assertEqual("descripcion" in item, True)
+            self.assertEqual("descripcion_corta" in item, True)
+            self.assertEqual("directorio_edictos" in item, True)
+            self.assertEqual("directorio_glosas" in item, True)
+            self.assertEqual("directorio_listas_de_acuerdos" in item, True)
+            self.assertEqual("directorio_sentencias" in item, True)
+            self.assertEqual("es_extinto" in item, True)
+            self.assertEqual("es_cemasc" in item, True)
+            self.assertEqual("es_defensoria" in item, True)
+            self.assertEqual("es_jurisdiccional" in item, True)
+            self.assertEqual("es_notaria" in item, True)
+            self.assertEqual("es_organo_especializado" in item, True)
+            self.assertEqual("organo_jurisdiccional" in item, True)
 
 
 if __name__ == "__main__":

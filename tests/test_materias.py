@@ -39,7 +39,6 @@ class TestMaterias(unittest.TestCase):
         self.assertEqual(type(contenido["data"]), list)
         for item in contenido["data"]:
             self.assertEqual("clave" in item, True)
-            self.assertEqual("clave" in item, True)
             self.assertEqual("nombre" in item, True)
             self.assertEqual("descripcion" in item, True)
             self.assertEqual("en_sentencias" in item, True)
