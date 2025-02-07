@@ -1,7 +1,7 @@
 [project]
 name = "pjecz-hercules-api-key"
 version = "5.0.0"
-description = ""
+description = "PJECZ API key de Plataforma Web"
 authors = [
     {name = "Guillermo Valdes",email = "guillermo@movimientolibre.com"}
 ]

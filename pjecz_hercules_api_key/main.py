@@ -24,8 +24,8 @@ from .settings import get_settings
 
 # FastAPI
 app = FastAPI(
-    title="API pública del Poder Judicial del Estado de Coahuila de Zaragoza",
-    description="Para consultar la base de datos Plataforma Web. Para solicitar api-key escriba a informatica en pjecz.gob.mx.",
+    title="PJECZ API key de Plataforma Web",
+    description="API de uso público para consultar edictos, listas de acuerdos, sentencias, etc.",
     docs_url="/docs",
     redoc_url=None,
 )

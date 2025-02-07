@@ -13,10 +13,10 @@ from sqlalchemy.orm import Session
 from starlette.status import HTTP_403_FORBIDDEN
 from unidecode import unidecode
 
-from ..dependencies.database import get_db
-from ..dependencies.exceptions import MyAuthenticationError
 from ..models.usuarios import Usuario
 from ..schemas.usuarios import UsuarioInDB
+from .database import get_db
+from .exceptions import MyAuthenticationError
 
 API_KEY_REGEXP = r"^\w+\.\w+\.\w+$"
 X_API_KEY = APIKeyHeader(name="X-Api-Key")

@@ -16,9 +16,8 @@
 __pycache__/
 
 /poetry.lock
+/requirements.txt
 /.idea/
 /.poetry/
 /.venv/
 /venv/
-
-requirements.txt
