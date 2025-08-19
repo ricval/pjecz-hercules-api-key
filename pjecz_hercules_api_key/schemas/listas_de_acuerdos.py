@@ -6,8 +6,6 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class ListaDeAcuerdoOut(BaseModel):
     """Esquema para entregar listas de acuerdos"""
@@ -35,7 +33,9 @@ class ListaDeAcuerdoRAGOut(ListaDeAcuerdoOut):
     rag_categorias: dict | None = None
 
 
-class OneListaDeAcuerdoOut(OneBaseOut):
+class OneListaDeAcuerdoOut(BaseModel):
     """Esquema para entregar una lista de acuerdos"""
 
+    success: bool
+    message: str
     data: ListaDeAcuerdoRAGOut | None = None

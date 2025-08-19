@@ -2,7 +2,7 @@
 Edictos
 """
 
-from datetime import date, datetime
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -41,31 +41,26 @@ async def detalle(
 async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
-    autoridad_clave: str = None,
-    creado: date = None,
-    creado_desde: date = None,
-    creado_hasta: date = None,
+    autoridad_clave: str = "",
+    fecha: date | None = None,
+    fecha_desde: date | None = None,
+    fecha_hasta: date | None = None,
 ):
     """Paginado de edictos"""
     if current_user.permissions.get("EDICTOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     consulta = database.query(Edicto)
-    if autoridad_clave is not None:
+    if autoridad_clave:
         try:
             autoridad_clave = safe_clave(autoridad_clave)
         except ValueError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válida la clave")
         consulta = consulta.join(Autoridad).filter(Autoridad.clave == autoridad_clave).filter(Autoridad.estatus == "A")
-    if creado is not None:
-        consulta = consulta.filter(Edicto.creado >= datetime(creado.year, creado.month, creado.day, 0, 0, 0))
-        consulta = consulta.filter(Edicto.creado <= datetime(creado.year, creado.month, creado.day, 23, 59, 59))
+    if fecha is not None:
+        consulta = consulta.filter(Edicto.fecha == fecha)
     else:
-        if creado_desde is not None:
-            consulta = consulta.filter(
-                Edicto.creado >= datetime(creado_desde.year, creado_desde.month, creado_desde.day, 0, 0, 0)
-            )
-        if creado_hasta is not None:
-            consulta = consulta.filter(
-                Edicto.creado <= datetime(creado_hasta.year, creado_hasta.month, creado_hasta.day, 23, 59, 59)
-            )
+        if fecha_desde is not None:
+            consulta = consulta.filter(Edicto.fecha >= fecha_desde)
+        if fecha_hasta is not None:
+            consulta = consulta.filter(Edicto.fecha <= fecha_hasta)
     return paginate(consulta.filter(Edicto.estatus == "A").order_by(Edicto.id.desc()))

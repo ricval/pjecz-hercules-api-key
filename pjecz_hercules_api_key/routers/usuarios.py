@@ -6,7 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from ..dependencies.authentications import UsuarioInDB, get_current_active_user
 from ..dependencies.database import Session, get_db
@@ -29,7 +29,7 @@ async def detalle_usuario(
     if current_user.permissions.get("USUARIOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     try:
-        email = safe_email(email)
+        email = str(safe_email(email))
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válido el e-mail")
     try:
@@ -45,10 +45,10 @@ async def detalle_usuario(
 async def paginado_usuarios(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
-    apellido_paterno: str = None,
-    apellido_materno: str = None,
-    email: str = None,
-    nombres: str = None,
+    apellido_paterno: str | None = None,
+    apellido_materno: str | None = None,
+    email: str | None = None,
+    nombres: str | None = None,
 ):
     """Paginado de usuarios"""
     if current_user.permissions.get("USUARIOS", 0) < Permiso.VER:
@@ -64,7 +64,7 @@ async def paginado_usuarios(
             consulta = consulta.filter(Usuario.apellido_materno.contains(apellido_materno))
     if email is not None:
         try:
-            email = safe_email(email, search_fragment=True)
+            email = str(safe_email(email, search_fragment=True))
         except ValueError:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No es válido el e-mail")
         consulta = consulta.filter(Usuario.email.contains(email))

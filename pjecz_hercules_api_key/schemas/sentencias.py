@@ -6,8 +6,6 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class SentenciaOut(BaseModel):
     """Esquema para entregar sentencias"""
@@ -45,7 +43,9 @@ class SentenciaRAGOut(SentenciaOut):
     rag_categorias: dict | None = None
 
 
-class OneSentenciaOut(OneBaseOut):
+class OneSentenciaOut(BaseModel):
     """Esquema para entregar una sentencia"""
 
+    success: bool
+    message: str
     data: SentenciaRAGOut | None = None

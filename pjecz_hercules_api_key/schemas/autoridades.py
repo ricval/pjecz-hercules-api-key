@@ -4,8 +4,6 @@ Autoridades, esquemas de pydantic
 
 from pydantic import BaseModel, ConfigDict
 
-from ..dependencies.schemas_base import OneBaseOut
-
 
 class AutoridadOut(BaseModel):
     """Esquema para entregar autoridades"""
@@ -18,10 +16,6 @@ class AutoridadOut(BaseModel):
     materia_nombre: str
     descripcion: str
     descripcion_corta: str
-    directorio_edictos: str
-    directorio_glosas: str
-    directorio_listas_de_acuerdos: str
-    directorio_sentencias: str
     es_extinto: bool
     es_cemasc: bool
     es_defensoria: bool
@@ -32,7 +26,9 @@ class AutoridadOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OneAutoridadOut(OneBaseOut):
+class OneAutoridadOut(BaseModel):
     """Esquema para entregar una autoridad"""
 
+    success: bool
+    message: str
     data: AutoridadOut | None = None

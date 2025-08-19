@@ -14,14 +14,6 @@ from ..dependencies.universal_mixin import UniversalMixin
 class Autoridad(Base, UniversalMixin):
     """Autoridad"""
 
-    AUDIENCIAS_CATEGORIAS = {
-        "NO DEFINIDO": "No Definido",
-        "CIVIL FAMILIAR MERCANTIL LETRADO TCYA": "Civil Familiar Mercantil Letrado TCyA",
-        "MATERIA ACUSATORIO PENAL ORAL": "Materia Acusatorio Penal Oral",
-        "DISTRITALES": "Distritales",
-        "SALAS": "Salas",
-    }
-
     ORGANOS_JURISDICCIONALES = {
         "NO DEFINIDO": "No Definido",
         "JUZGADO DE PRIMERA INSTANCIA": "Juzgado de Primera Instancia",
@@ -61,15 +53,12 @@ class Autoridad(Base, UniversalMixin):
     directorio_glosas: Mapped[str] = mapped_column(String(256))
     directorio_listas_de_acuerdos: Mapped[str] = mapped_column(String(256))
     directorio_sentencias: Mapped[str] = mapped_column(String(256))
-    audiencia_categoria: Mapped[str] = mapped_column(
-        Enum(*AUDIENCIAS_CATEGORIAS, name="autoridades_audiencias_categorias", native_enum=False),
-        index=True,
-    )
 
     # Hijos
     edictos: Mapped[List["Edicto"]] = relationship("Edicto", back_populates="autoridad")
     listas_de_acuerdos: Mapped[List["ListaDeAcuerdo"]] = relationship("ListaDeAcuerdo", back_populates="autoridad")
     sentencias: Mapped[List["Sentencia"]] = relationship("Sentencia", back_populates="autoridad")
+    usuarios: Mapped[List["Usuario"]] = relationship("Usuario", back_populates="autoridad")
 
     @property
     def distrito_clave(self):
