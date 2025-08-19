@@ -24,8 +24,8 @@ usuarios_roles = APIRouter(prefix="/api/v5/usuarios_roles", tags=["usuarios"])
 async def paginado_usuarios_roles(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
-    rol_id: int = None,
-    email: str = None,
+    rol_id: int | None = None,
+    email: str | None = None,
 ):
     """Paginado de usuarios-roles"""
     if current_user.permissions.get("USUARIOS ROLES", 0) < Permiso.VER:

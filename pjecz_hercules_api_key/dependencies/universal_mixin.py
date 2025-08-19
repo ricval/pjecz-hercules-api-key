@@ -10,10 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.functions import now
 from sqlalchemy.types import CHAR
 
-from ..settings import get_settings
+from ..config.settings import get_settings
 
 settings = get_settings()
-hashids = Hashids(salt=settings.salt, min_length=8)
+hashids = Hashids(salt=settings.SALT, min_length=8)
 
 
 class UniversalMixin:
@@ -33,7 +33,6 @@ class UniversalMixin:
         if re.fullmatch(r"[0-9a-zA-Z]{8,16}", id_encoded) is None:
             return None
         descifrado = hashids.decode(id_encoded)
-        try:
-            return descifrado[0]
-        except IndexError:
+        if len(descifrado) == 0:
             return None
+        return descifrado[0]

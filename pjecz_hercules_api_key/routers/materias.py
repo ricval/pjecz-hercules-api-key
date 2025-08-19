@@ -6,7 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
 from ..dependencies.authentications import UsuarioInDB, get_current_active_user
 from ..dependencies.database import Session, get_db
@@ -24,6 +24,7 @@ async def detalle(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     clave: str,
+    distrito_clave: str = "",
 ):
     """Detalle de una materia a partir de su clave"""
     if current_user.permissions.get("MATERIAS", 0) < Permiso.VER:
@@ -45,8 +46,12 @@ async def detalle(
 async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
+    en_sentencias: bool | None = None,
 ):
     """Paginado de materias"""
     if current_user.permissions.get("MATERIAS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    return paginate(database.query(Materia).filter_by(estatus="A").order_by(Materia.nombre))
+    consulta = database.query(Materia)
+    if en_sentencias is not None:
+        consulta = consulta.filter(Materia.en_sentencias == en_sentencias)
+    return paginate(consulta.filter_by(estatus="A").order_by(Materia.nombre))
