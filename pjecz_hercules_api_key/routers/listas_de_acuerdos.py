@@ -26,7 +26,7 @@ from ..schemas.listas_de_acuerdos import ListaDeAcuerdoOut, ListaDeAcuerdoRAGOut
 listas_de_acuerdos = APIRouter(prefix="/api/v5/listas_de_acuerdos", tags=["listas de acuerdos"])
 
 
-@listas_de_acuerdos.get("/listas_de_acuerdos/visualizar/{lista_de_acuerdo_id}")
+@listas_de_acuerdos.get("/visualizar/{lista_de_acuerdo_id}")
 async def visualizar(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
