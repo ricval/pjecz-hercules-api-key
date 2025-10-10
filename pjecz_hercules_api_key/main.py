@@ -10,6 +10,7 @@ from .config.settings import get_settings
 from .routers.autoridades import autoridades
 from .routers.distritos import distritos
 from .routers.edictos import edictos
+from .routers.exh_exhortos import exh_exhortos
 from .routers.listas_de_acuerdos import listas_de_acuerdos
 from .routers.materias import materias
 from .routers.materias_tipos_juicios import materias_tipos_juicios
@@ -42,6 +43,7 @@ app.add_middleware(
 app.include_router(autoridades)
 app.include_router(distritos)
 app.include_router(edictos)
+app.include_router(exh_exhortos)
 app.include_router(listas_de_acuerdos)
 app.include_router(materias)
 app.include_router(materias_tipos_juicios)
