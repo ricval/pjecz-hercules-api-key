@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..dependencies.database import Base
 from ..dependencies.universal_mixin import UniversalMixin
 
+from ..models.municipios import Municipio
 
 class Autoridad(Base, UniversalMixin):
     """Autoridad"""
@@ -34,6 +35,8 @@ class Autoridad(Base, UniversalMixin):
     distrito: Mapped["Distrito"] = relationship(back_populates="autoridades")
     materia_id: Mapped[int] = mapped_column(ForeignKey("materias.id"))
     materia: Mapped["Materia"] = relationship(back_populates="autoridades")
+    municipio_id: Mapped[int] = mapped_column(ForeignKey("municipios.id"))
+    municipio: Mapped["Municipio"] = relationship(back_populates="autoridades")
 
     # Columnas
     clave: Mapped[str] = mapped_column(String(16), unique=True)
