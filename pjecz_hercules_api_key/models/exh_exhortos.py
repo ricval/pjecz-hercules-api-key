@@ -3,19 +3,19 @@ Exh Exhortos, modelos
 """
 
 from datetime import date, datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from sqlalchemy import JSON, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..dependencies.database import Base
 from ..dependencies.universal_mixin import UniversalMixin
-
 from ..models.exh_areas import ExhArea
 from ..models.exh_exhortos_archivos import ExhExhortoArchivo
 from ..models.exh_exhortos_partes import ExhExhortoParte
 from ..models.exh_tipos_diligencias import ExhTipoDiligencia
 from ..models.municipios import Municipio
+
 
 class ExhExhorto(Base, UniversalMixin):
     """ExhExhorto"""
@@ -97,16 +97,25 @@ class ExhExhorto(Base, UniversalMixin):
     # Colección de los datos referentes a los archivos que se van a recibir el Poder Judicial exhortado en el envío del Exhorto.
     exh_exhortos_archivos: Mapped[List["ExhExhortoArchivo"]] = relationship("ExhExhortoArchivo", back_populates="exh_exhorto")
 
-
     @property
     def autoridad_clave(self):
         """Regresa la clave de la autoridad"""
         return self.autoridad.clave
 
     @property
+    def exh_area_clave(self):
+        """Regresa la clave del área de recepción"""
+        return self.exh_area.clave
+
+    @property
     def municipio_origen_nombre(self):
         """Regresa el nombre del municipio de origen"""
         return self.municipio_origen.nombre
+
+    @property
+    def municipio_destino_nombre(self):
+        """Regresa el nombre del municipio de destino"""
+        return "DEBE SER CONSULTADO EXTERNAMENTE"
 
     def __repr__(self):
         """Representación"""
