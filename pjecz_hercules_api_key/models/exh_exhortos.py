@@ -73,6 +73,13 @@ class ExhExhorto(Base, UniversalMixin):
     materia_clave: Mapped[str] = mapped_column(String(32))
     materia_nombre: Mapped[str] = mapped_column(String(256))
 
+    # Identificador propio y nombre del Juzgado/Área que envía el Exhorto
+    juzgado_origen_id: Mapped[Optional[str]] = mapped_column(String(64))
+    juzgado_origen_nombre: Mapped[str] = mapped_column(String(256))
+
+    # El número de expediente (o carpeta procesal, carpeta...) que tiene el asunto en el Juzgado de Origen
+    numero_expediente_origen: Mapped[str] = mapped_column(String(256))
+
     # Nombre del tipo de Juicio, o asunto, listado de los delitos (para materia Penal)
     # que corresponde al Expediente del cual el Juzgado envía el Exhorto
     tipo_juicio_asunto_delitos: Mapped[str] = mapped_column(String(256))
