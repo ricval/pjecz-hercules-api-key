@@ -6,6 +6,8 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from ..schemas.exh_exhortos_partes import ExhExhortoParteOut, ExhExhortoParteIn
+
 
 class ExhExhortoOut(BaseModel):
     """Esquema para entregar exhortos"""
@@ -28,6 +30,7 @@ class ExhExhortoOut(BaseModel):
     dias_responder: int
     remitente: str
     estado: str
+    exh_exhorto_partes: list[ExhExhortoParteOut] | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -54,3 +57,4 @@ class ExhExhortoIn(BaseModel):
     tipo_juicio_asunto_delitos: str
     fojas: int
     dias_responder: int
+    exh_exhorto_partes: list[ExhExhortoParteIn]
