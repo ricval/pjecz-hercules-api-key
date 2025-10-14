@@ -22,10 +22,12 @@ from ..models.autoridades import Autoridad
 from ..models.exh_areas import ExhArea
 from ..models.exh_exhortos import ExhExhorto
 from ..models.exh_tipos_diligencias import ExhTipoDiligencia
+from ..models.exh_exhortos_partes import ExhExhortoParte
 from ..models.materias import Materia
 from ..models.municipios import Municipio
 from ..models.permisos import Permiso
 from ..schemas.exh_exhortos import ExhExhortoIn, ExhExhortoOut, OneExhExhortoOut
+from ..schemas.exh_exhortos_partes import ExhExhortoParteOut
 
 exh_exhortos = APIRouter(prefix="/api/v5/exh_exhortos", tags=["exhortos"])
 
@@ -44,6 +46,15 @@ async def detalle(
         return OneExhExhortoOut(success=False, message="No existe ese exhorto")
     if exh_exhorto.estatus != "A":
         return OneExhExhortoOut(success=False, message="No es activo ese exhorto, está eliminado")
+    # Obtener las partes
+    exh_exhortos_partes = database.query(ExhExhortoParte).filter(ExhExhortoParte.exh_exhorto_id == exh_exhorto_id).all()
+    if exh_exhortos_partes is None:
+        return OneExhExhortoOut(success=False, message="No existen partes en este exhorto")
+    partes = []
+    for parte in exh_exhortos_partes:
+        partes.append(ExhExhortoParteOut.model_validate(parte))
+    exh_exhorto.exh_exhorto_partes = partes
+    # Entregar
     return OneExhExhortoOut(
         success=True,
         message="Detalle del exhorto",
@@ -145,6 +156,9 @@ async def crear(
         municipio_destino_id=municipio_destino.id,
         materia_clave=materia.clave,
         materia_nombre=materia.nombre,
+        juzgado_origen_id=exh_exhorto_in.juzgado_origen_id,
+        juzgado_origen_nombre=exh_exhorto_in.juzgado_origen_nombre,
+        numero_expediente_origen=exh_exhorto_in.numero_expediente_origen,
         tipo_juicio_asunto_delitos=exh_exhorto_in.tipo_juicio_asunto_delitos,
         fojas=exh_exhorto_in.fojas,
         dias_responder=exh_exhorto_in.dias_responder,
@@ -154,6 +168,22 @@ async def crear(
     database.add(exh_exhorto)
     database.commit()
     database.refresh(exh_exhorto)
+
+    # Crear las Partes
+    for exh_exhorto_parte_in in exh_exhorto_in.exh_exhorto_partes:
+        exh_exhorto_parte = ExhExhortoParte(
+            exh_exhorto_id=exh_exhorto.id,
+            nombre=exh_exhorto_parte_in.nombre,
+            apellido_paterno=exh_exhorto_parte_in.apellido_paterno,
+            apellido_materno=exh_exhorto_parte_in.apellido_materno,
+            genero=exh_exhorto_parte_in.genero,
+            es_persona_moral=exh_exhorto_parte_in.es_persona_moral,
+            tipo_parte=exh_exhorto_parte_in.tipo_parte,
+            tipo_parte_nombre=exh_exhorto_parte_in.tipo_parte_nombre,
+        )
+        database.add(exh_exhorto_parte)
+        database.commit()
+        database.refresh(exh_exhorto_parte)
 
     # Entregar
     return OneExhExhortoOut(
