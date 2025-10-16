@@ -16,6 +16,7 @@ from ..models.autoridades import Autoridad
 from ..models.exh_areas import ExhArea
 from ..models.exh_exhortos import ExhExhorto
 from ..models.exh_exhortos_partes import ExhExhortoParte
+from ..models.exh_exhortos_archivos import ExhExhortoArchivo
 from ..models.exh_tipos_diligencias import ExhTipoDiligencia
 from ..models.materias import Materia
 
@@ -24,6 +25,8 @@ from ..models.municipios import Municipio
 from ..models.permisos import Permiso
 from ..schemas.exh_exhortos import ExhExhortoIn, ExhExhortoOut, ExhExhortoPaginadoOut, OneExhExhortoOut
 from ..schemas.exh_exhortos_partes import ExhExhortoParteOut
+from ..schemas.exh_exhortos_archivos import ExhExhortoArchivoOut
+
 
 exh_exhortos = APIRouter(prefix="/api/v5/exh_exhortos", tags=["exhortos"])
 
@@ -58,6 +61,20 @@ async def detalle(
     for parte in exh_exhortos_partes:
         partes.append(ExhExhortoParteOut.model_validate(parte))
     exh_exhorto.exh_exhorto_partes = partes
+
+    # Consultar archivos
+    exh_exhortos_archivos = (
+        database.query(ExhExhortoArchivo)
+        .filter(ExhExhortoArchivo.exh_exhorto_id == exh_exhorto_id)
+        .filter(ExhExhortoArchivo.estatus == "A")
+        .all()
+    )
+    if exh_exhortos_archivos is None:
+        return OneExhExhortoOut(success=False, message="No existen archivos en este exhorto")
+    archivos = []
+    for archivo in exh_exhortos_archivos:
+        archivos.append(ExhExhortoArchivoOut.model_validate(archivo))
+    exh_exhorto.exh_exhorto_archivos = archivos
 
     # Entregar
     return OneExhExhortoOut(

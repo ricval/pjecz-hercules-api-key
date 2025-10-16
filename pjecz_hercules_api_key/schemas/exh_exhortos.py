@@ -5,6 +5,7 @@ Exh Exhortos, esquemas de pydantic
 from pydantic import BaseModel, ConfigDict
 
 from ..schemas.exh_exhortos_partes import ExhExhortoParteOut, ExhExhortoParteIn
+from ..schemas.exh_exhortos_archivos import ExhExhortoArchivoOut, ExhExhortoArchivoIn
 
 
 class ExhExhortoOut(BaseModel):
@@ -29,6 +30,7 @@ class ExhExhortoOut(BaseModel):
     remitente: str
     estado: str
     exh_exhorto_partes: list[ExhExhortoParteOut]
+    exh_exhorto_archivos: list[ExhExhortoArchivoOut]
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -78,3 +80,4 @@ class ExhExhortoIn(BaseModel):
     fojas: int
     dias_responder: int
     exh_exhorto_partes: list[ExhExhortoParteIn]
+    # exh_exhorto_archivos: list[ExhExhortoArchivoIn]
