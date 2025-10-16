@@ -11,7 +11,7 @@ from ..config.settings import Settings, get_settings
 from ..dependencies.authentications import UsuarioInDB, get_current_active_user
 from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
-from ..dependencies.safe_string import safe_clave, safe_string
+from ..dependencies.safe_string import safe_clave, safe_string, safe_url
 from ..models.autoridades import Autoridad
 from ..models.exh_areas import ExhArea
 from ..models.exh_exhortos import ExhExhorto
@@ -234,9 +234,33 @@ async def crear(
         partes.append(parte)
 
     # Validar Archivos
-    # TODO:
-    # archivos = []  # Vamos a ir guardando los archivos validados
-    # for exh_exhorto_archivo_in in exh_exhorto_in.exh_exhorto_archivos:
+    archivos = []  # Vamos a ir guardando los archivos validados
+    for exh_exhorto_archivo_in in exh_exhorto_in.exh_exhorto_archivos:
+        archivo = {}
+        # Validar nombre del archivo
+        nombre_archivo = safe_string(exh_exhorto_archivo_in.nombre_archivo)
+        if nombre_archivo == "":
+            return OneExhExhortoOut(success=False, message="El nombre de un archivo no es válido")
+        archivo["nombre_archivo"] = nombre_archivo
+        # Validar el tipo de documento del archivo
+        if exh_exhorto_archivo_in.tipo_documento not in ExhExhortoArchivo.TIPOS_DOCUMENTOS:
+            return OneExhExhortoOut(success=False, message="El tipo de documento de un archivo no es válido")
+        archivo["tipo_documento"] = exh_exhorto_archivo_in.tipo_documento
+        # Validar la url del archivo
+        url = safe_url(exh_exhorto_archivo_in.url)
+        if url == "":
+            return OneExhExhortoOut(success=False, message="La URL de un archivo no es válida")
+        archivo["url"] = url
+        # Validar tamaño del archivo
+        tamanio = exh_exhorto_archivo_in.tamano
+        if tamanio is None:
+            archivo["tamano"] = None
+        else:
+            if tamanio < 0:
+                return OneExhExhortoOut(success=False, message="El tamaño de un archivo no es válido")
+            archivo["tamano"] = tamanio
+        # Añadir archivo al listado de archivos
+        archivos.append(archivo)
 
     # Insertar el exhorto
     exh_exhorto = ExhExhorto(
@@ -278,7 +302,18 @@ async def crear(
     database.commit()
 
     # Insertar los Archivos
-    # TODO:
+    for archivo in archivos:
+        exh_exhorto_archivo = ExhExhortoArchivo(
+            exh_exhorto_id=exh_exhorto.id,
+            nombre_archivo=archivo["nombre_archivo"],
+            tipo_documento=archivo["tipo_documento"],
+            url=archivo["url"],
+            tamano=archivo["tamano"],
+            estado="RECIBIDO",
+        )
+        database.add(exh_exhorto_archivo)
+    # Insertar los archivos
+    database.commit()
 
     # Consultar y elaborar el listado de las partes
     exh_exhortos_partes = database.query(ExhExhortoParte).filter(ExhExhortoParte.exh_exhorto_id == exh_exhorto.id).all()
@@ -290,7 +325,13 @@ async def crear(
     exh_exhorto.exh_exhorto_partes = partes
 
     # Consultar y elaborar listado de los archivos
-    # TODO:
+    exh_exhortos_archivos = database.query(ExhExhortoArchivo).filter(ExhExhortoArchivo.exh_exhorto_id == exh_exhorto.id).all()
+    if exh_exhortos_archivos is None:
+        return OneExhExhortoOut(success=False, message="No existen archivos en este exhorto")
+    archivos = []
+    for archivo in exh_exhortos_archivos:
+        archivos.append(ExhExhortoArchivoOut.model_validate(archivo))
+    exh_exhorto.exh_exhorto_archivos = archivos
 
     # Entregar
     return OneExhExhortoOut(

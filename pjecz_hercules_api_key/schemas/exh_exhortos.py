@@ -80,4 +80,4 @@ class ExhExhortoIn(BaseModel):
     fojas: int
     dias_responder: int
     exh_exhorto_partes: list[ExhExhortoParteIn]
-    # exh_exhorto_archivos: list[ExhExhortoArchivoIn]
+    exh_exhorto_archivos: list[ExhExhortoArchivoIn]

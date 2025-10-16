@@ -70,40 +70,64 @@ class TestExhExhortos(unittest.TestCase):
         }
 
         # Definir la parte demandada
-        parte_demandado_genero = faker.random_element(elements=("M", "F"))
-        if parte_demandado_genero == "M":
-            parte_demandado_nombre = faker.first_name_male()
-            parte_demandado_apellido_paterno = faker.last_name_male()
-            parte_demandado_apellido_materno = faker.last_name_male()
+        # Definir si es una persona moral o física
+        es_persona_moral = faker.random_element(elements=(True, False))
+        if es_persona_moral:
+            parte_demandado = {
+                "es_persona_moral": True,
+                "nombre": faker.company(),
+                "tipo_parte": 2,  # 2 es demandado
+            }
         else:
-            parte_demandado_nombre = faker.first_name_female()
-            parte_demandado_apellido_paterno = faker.last_name_female()
-            parte_demandado_apellido_materno = faker.last_name_female()
-        parte_demandado = {
-            "nombre": parte_demandado_nombre,
-            "apellido_paterno": parte_demandado_apellido_paterno,
-            "apellido_materno": parte_demandado_apellido_materno,
-            "genero": parte_demandado_genero,
-            "es_persona_moral": False,
-            "tipo_parte": 2,  # 2 es demandado
-            "tipo_parte_nombre": "",  # Va vacío porque tipo_parte NO es 3
-        }
+            # Definir la parte demandada
+            parte_demandado_genero = faker.random_element(elements=("M", "F"))
+            if parte_demandado_genero == "M":
+                parte_demandado_nombre = faker.first_name_male()
+                parte_demandado_apellido_paterno = faker.last_name_male()
+                parte_demandado_apellido_materno = faker.last_name_male()
+            else:
+                parte_demandado_nombre = faker.first_name_female()
+                parte_demandado_apellido_paterno = faker.last_name_female()
+                parte_demandado_apellido_materno = faker.last_name_female()
+            parte_demandado = {
+                "nombre": parte_demandado_nombre,
+                "apellido_paterno": parte_demandado_apellido_paterno,
+                "apellido_materno": parte_demandado_apellido_materno,
+                "genero": parte_demandado_genero,
+                "es_persona_moral": False,
+                "tipo_parte": 2,  # 2 es demandado
+                "tipo_parte_nombre": "",  # Va vacío porque tipo_parte NO es 3
+            }
+
+        # Definir el archivos
+        archivos = []
+        num_archivos = faker.random_int(min=1, max=5)
+        for i in range(num_archivos):
+            # Definir el archivo
+            archivo = {
+                "nombre_archivo": faker.file_name(),
+                "tipo_documento": faker.random_int(min=1, max=3),
+                "url": faker.url(),
+            }
+            archivos.append(archivo)
+
 
         # Definir el exhorto
         exh_exhorto = {
             "autoridad_clave": "TRC-J1-FAM",
             "exh_area_clave": "TRC-OCP",
             "municipio_origen_id": 30,
-            "exhorto_origen_id": "y7p5biVIxjuiw3te",
+            "exhorto_origen_id": faker.pystr(min_chars=10, max_chars=10),
             "municipio_destino_id": 35,
             "materia_clave": "FAM",
             "juzgado_origen_id": "SLT-J1-FAM",
             "juzgado_origen_nombre": "JUZGADO PRIMERO DE PRIMERA INSTANCIA DEL DISTRITO JUDICIAL DE SALTILLO",
-            "numero_expediente_origen": "1/2025",
+            "numero_expediente_origen": f"{faker.random_int(min=1, max=999)}/2025",
             "tipo_juicio_asunto_delitos": "DIVORCIO",
             "fojas": 20,
             "dias_responder": 30,
             "exh_exhorto_partes": [parte_actor, parte_demandado],
+            "exh_exhorto_archivos": archivos,
         }
 
         # Mandar el exhorto
