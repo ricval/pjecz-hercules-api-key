@@ -22,11 +22,10 @@ class ExhExhortoParteOut(BaseModel):
 class ExhExhortoParteIn(BaseModel):
     """Esquema para recibir exhortos Parte"""
 
-    exh_exhorto_id: int
     nombre: str
-    apellido_paterno: str
-    apellido_materno: str
+    apellido_paterno: str | None = None
+    apellido_materno: str | None = None
     genero: str
     es_persona_moral: bool
     tipo_parte: int
-    tipo_parte_nombre: str
+    tipo_parte_nombre: str | None = None

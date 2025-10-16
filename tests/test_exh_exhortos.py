@@ -60,14 +60,13 @@ class TestExhExhortos(unittest.TestCase):
             parte_actor_apellido_paterno = faker.last_name_female()
             parte_actor_apellido_materno = faker.last_name_female()
         parte_actor = {
-            "exh_exhorto_id": None,  # Se asigna al crear el exhorto
             "nombre": parte_actor_nombre,
             "apellido_paterno": parte_actor_apellido_paterno,
             "apellido_materno": parte_actor_apellido_materno,
             "genero": parte_actor_genero,
             "es_persona_moral": False,
             "tipo_parte": 1,  # 1 es actora
-            "tipo_parte_nombre": "",  # Va vacio porque tipo_parte NO es 3
+            "tipo_parte_nombre": "",  # Va vacío porque tipo_parte NO es 3
         }
 
         # Definir la parte demandada
@@ -81,14 +80,13 @@ class TestExhExhortos(unittest.TestCase):
             parte_demandado_apellido_paterno = faker.last_name_female()
             parte_demandado_apellido_materno = faker.last_name_female()
         parte_demandado = {
-            "exh_exhorto_id": None,  # Se asigna al crear el exhorto
             "nombre": parte_demandado_nombre,
             "apellido_paterno": parte_demandado_apellido_paterno,
             "apellido_materno": parte_demandado_apellido_materno,
             "genero": parte_demandado_genero,
             "es_persona_moral": False,
             "tipo_parte": 2,  # 2 es demandado
-            "tipo_parte_nombre": "",  # Va vacio porque tipo_parte NO es 3
+            "tipo_parte_nombre": "",  # Va vacío porque tipo_parte NO es 3
         }
 
         # Definir el exhorto
@@ -107,7 +105,6 @@ class TestExhExhortos(unittest.TestCase):
             "dias_responder": 30,
             "exh_exhorto_partes": [parte_actor, parte_demandado],
         }
-        print(exh_exhorto)
 
         # Mandar el exhorto
         try:
