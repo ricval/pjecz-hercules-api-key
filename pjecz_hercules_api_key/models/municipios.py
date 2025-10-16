@@ -21,8 +21,8 @@ class Municipio(Base, UniversalMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     # Clave foránea
-    # estado_id: Mapped[int] = mapped_column(ForeignKey("estados.id"))
-    # estado: Mapped["Estado"] = relationship(back_populates="municipios")
+    estado_id: Mapped[int] = mapped_column(ForeignKey("estados.id"))
+    estado: Mapped["Estado"] = relationship(back_populates="municipios")
 
     # Columnas
     clave: Mapped[str] = mapped_column(String(3))
