@@ -99,7 +99,7 @@ class TestExhExhortos(unittest.TestCase):
                 "tipo_parte_nombre": "",  # Va vacío porque tipo_parte NO es 3
             }
 
-        # Definir el archivos
+        # Definir los archivos
         archivos = []
         num_archivos = faker.random_int(min=1, max=5)
         for i in range(num_archivos):
@@ -142,7 +142,6 @@ class TestExhExhortos(unittest.TestCase):
             self.fail(error)
         self.assertEqual(respuesta.status_code, 200)
 
-        # Validaciones
 
 
 if __name__ == "__main__":
