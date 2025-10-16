@@ -25,7 +25,7 @@ class ExhExhortoParteIn(BaseModel):
     nombre: str
     apellido_paterno: str | None = None
     apellido_materno: str | None = None
-    genero: str
+    genero: str | None = None
     es_persona_moral: bool
     tipo_parte: int
     tipo_parte_nombre: str | None = None
