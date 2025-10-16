@@ -13,20 +13,18 @@ from ..dependencies.database import Session, get_db
 from ..dependencies.fastapi_pagination_custom_page import CustomPage
 from ..dependencies.safe_string import safe_clave, safe_string, safe_url
 from ..models.autoridades import Autoridad
+from ..models.estados import Estado
 from ..models.exh_areas import ExhArea
 from ..models.exh_exhortos import ExhExhorto
-from ..models.exh_exhortos_partes import ExhExhortoParte
 from ..models.exh_exhortos_archivos import ExhExhortoArchivo
+from ..models.exh_exhortos_partes import ExhExhortoParte
 from ..models.exh_tipos_diligencias import ExhTipoDiligencia
 from ..models.materias import Materia
-
-from ..models.estados import Estado
 from ..models.municipios import Municipio
 from ..models.permisos import Permiso
 from ..schemas.exh_exhortos import ExhExhortoIn, ExhExhortoOut, ExhExhortoPaginadoOut, OneExhExhortoOut
-from ..schemas.exh_exhortos_partes import ExhExhortoParteOut
 from ..schemas.exh_exhortos_archivos import ExhExhortoArchivoOut
-
+from ..schemas.exh_exhortos_partes import ExhExhortoParteOut
 
 exh_exhortos = APIRouter(prefix="/api/v5/exh_exhortos", tags=["exhortos"])
 
@@ -48,32 +46,18 @@ async def detalle(
     if exh_exhorto.estatus != "A":
         return OneExhExhortoOut(success=False, message="No es activo ese exhorto, está eliminado")
 
-    # Consultar las partes
-    exh_exhortos_partes = (
-        database.query(ExhExhortoParte)
-        .filter(ExhExhortoParte.exh_exhorto_id == exh_exhorto_id)
-        .filter(ExhExhortoParte.estatus == "A")
-        .all()
-    )
-    if exh_exhortos_partes is None:
-        return OneExhExhortoOut(success=False, message="No existen partes en este exhorto")
+    # Consultar las partes activas (estatus == "B")
     partes = []
-    for parte in exh_exhortos_partes:
-        partes.append(ExhExhortoParteOut.model_validate(parte))
+    for parte in exh_exhorto.exh_exhortos_partes:
+        if parte.estatus == "A":
+            partes.append(ExhExhortoParteOut.model_validate(parte))
     exh_exhorto.exh_exhorto_partes = partes
 
-    # Consultar archivos
-    exh_exhortos_archivos = (
-        database.query(ExhExhortoArchivo)
-        .filter(ExhExhortoArchivo.exh_exhorto_id == exh_exhorto_id)
-        .filter(ExhExhortoArchivo.estatus == "A")
-        .all()
-    )
-    if exh_exhortos_archivos is None:
-        return OneExhExhortoOut(success=False, message="No existen archivos en este exhorto")
+    # Consultar los archivos activos (estaus == "A")
     archivos = []
-    for archivo in exh_exhortos_archivos:
-        archivos.append(ExhExhortoArchivoOut.model_validate(archivo))
+    for archivo in exh_exhorto.exh_exhortos_archivos:
+        if archivo.estatus == "A":
+            archivos.append(ExhExhortoArchivoOut.model_validate(archivo))
     exh_exhorto.exh_exhorto_archivos = archivos
 
     # Entregar
@@ -105,10 +89,10 @@ async def paginado(
 
 @exh_exhortos.post("", response_model=OneExhExhortoOut)
 async def crear(
-    exh_exhorto_in: ExhExhortoIn,
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
+    exh_exhorto_in: ExhExhortoIn,
 ):
     """Crear un exhorto"""
     if current_user.permissions.get("EXH EXHORTOS", 0) < Permiso.CREAR:
@@ -144,7 +128,13 @@ async def crear(
     # Validar el municipio de origen
     # Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
     # Se debe definir el registro correcto en la tabla de municipios
-    municipio_origen = database.query(Municipio).join(Estado).filter(Municipio.clave==str(exh_exhorto_in.municipio_origen_id).zfill(3)).filter(Estado.clave == estado.clave).first()
+    municipio_origen = (
+        database.query(Municipio)
+        .join(Estado)
+        .filter(Municipio.clave == str(exh_exhorto_in.municipio_origen_id).zfill(3))
+        .filter(Estado.clave == estado.clave)
+        .first()
+    )
     if municipio_origen is None:
         return OneExhExhortoOut(success=False, message=f"No existe ese municipio de origen ({estado.clave})")
     if municipio_origen.estatus != "A":
@@ -153,7 +143,13 @@ async def crear(
     # Validar el municipio de destino
     # Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
     # Se debe definir el registro correcto en la tabla de municipios
-    municipio_destino = database.query(Municipio).join(Estado).filter(Municipio.clave==str(exh_exhorto_in.municipio_destino_id).zfill(3)).filter(Estado.clave == estado.clave).first()
+    municipio_destino = (
+        database.query(Municipio)
+        .join(Estado)
+        .filter(Municipio.clave == str(exh_exhorto_in.municipio_destino_id).zfill(3))
+        .filter(Estado.clave == estado.clave)
+        .first()
+    )
     if municipio_destino is None:
         return OneExhExhortoOut(success=False, message="No existe ese municipio de destino")
     if municipio_destino.estatus != "A":
@@ -176,7 +172,7 @@ async def crear(
         return OneExhExhortoOut(success=False, message='No existe el tipo de diligencia con clave "OTR"')
     if exh_tipo_diligencia.estatus != "A":
         return OneExhExhortoOut(success=False, message='El tipo de diligencia con clave "OTR" no está activo')
-    
+
     # Validar número de fojas
     if exh_exhorto_in.fojas <= 0:
         return OneExhExhortoOut(success=False, message="El número de fojas no es válido, debe ser mayor a 0")
@@ -193,7 +189,7 @@ async def crear(
         parte_nombre = safe_string(exh_exhorto_parte_in.nombre)
         if parte_nombre == "":
             return OneExhExhortoOut(success=False, message="El nombre de una parte no es válido")
-        parte['nombre'] = parte_nombre
+        parte["nombre"] = parte_nombre
         # Validar el tipo de parte
         if exh_exhorto_parte_in.tipo_parte not in ExhExhortoParte.TIPOS_PARTES:
             return OneExhExhortoOut(success=False, message="El tipo de parte de una parte no es válido")
@@ -282,13 +278,11 @@ async def crear(
         estado="PENDIENTE",
     )
     database.add(exh_exhorto)
-    database.commit()
-    database.refresh(exh_exhorto)
 
     # Insertar las Partes
     for parte in partes:
         exh_exhorto_parte = ExhExhortoParte(
-            exh_exhorto_id=exh_exhorto.id,
+            exh_exhorto=exh_exhorto,
             nombre=parte["nombre"],
             apellido_paterno=parte["apellido_paterno"],
             apellido_materno=parte["apellido_materno"],
@@ -298,13 +292,11 @@ async def crear(
             tipo_parte_nombre=parte["tipo_parte_nombre"],
         )
         database.add(exh_exhorto_parte)
-    # Insertar las partes
-    database.commit()
 
     # Insertar los Archivos
     for archivo in archivos:
         exh_exhorto_archivo = ExhExhortoArchivo(
-            exh_exhorto_id=exh_exhorto.id,
+            exh_exhorto=exh_exhorto,
             nombre_archivo=archivo["nombre_archivo"],
             tipo_documento=archivo["tipo_documento"],
             url=archivo["url"],
@@ -312,25 +304,25 @@ async def crear(
             estado="RECIBIDO",
         )
         database.add(exh_exhorto_archivo)
-    # Insertar los archivos
+
+    # Hacer el commit para cerrar la transacción
     database.commit()
 
-    # Consultar y elaborar el listado de las partes
-    exh_exhortos_partes = database.query(ExhExhortoParte).filter(ExhExhortoParte.exh_exhorto_id == exh_exhorto.id).all()
-    if exh_exhortos_partes is None:
-        return OneExhExhortoOut(success=False, message="No existen partes en este exhorto")
+    # Refrescar el exhorto
+    database.refresh(exh_exhorto)
+
+    # Consultar las partes activas (estatus == "B") aunque se supone que todas lo están
     partes = []
-    for parte in exh_exhortos_partes:
-        partes.append(ExhExhortoParteOut.model_validate(parte))
+    for parte in exh_exhorto.exh_exhortos_partes:
+        if parte.estatus == "A":
+            partes.append(ExhExhortoParteOut.model_validate(parte))
     exh_exhorto.exh_exhorto_partes = partes
 
-    # Consultar y elaborar listado de los archivos
-    exh_exhortos_archivos = database.query(ExhExhortoArchivo).filter(ExhExhortoArchivo.exh_exhorto_id == exh_exhorto.id).all()
-    if exh_exhortos_archivos is None:
-        return OneExhExhortoOut(success=False, message="No existen archivos en este exhorto")
+    # Consultar los archivos activos (estaus == "A") aunque se supone que todas lo están
     archivos = []
-    for archivo in exh_exhortos_archivos:
-        archivos.append(ExhExhortoArchivoOut.model_validate(archivo))
+    for archivo in exh_exhorto.exh_exhortos_archivos:
+        if archivo.estatus == "A":
+            archivos.append(ExhExhortoArchivoOut.model_validate(archivo))
     exh_exhorto.exh_exhorto_archivos = archivos
 
     # Entregar
