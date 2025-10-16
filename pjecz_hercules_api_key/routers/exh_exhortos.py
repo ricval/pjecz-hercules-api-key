@@ -1,17 +1,11 @@
 """
-Listas de Acuerdos
+Exh Exhortos
 """
 
-from datetime import date
-from io import BytesIO
 from typing import Annotated
-from urllib.parse import unquote, urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import StreamingResponse
 from fastapi_pagination.ext.sqlalchemy import paginate
-from google.cloud import storage
-from hashids import Hashids
 
 from ..config.settings import Settings, get_settings
 from ..dependencies.authentications import UsuarioInDB, get_current_active_user
@@ -21,12 +15,14 @@ from ..dependencies.safe_string import safe_clave, safe_string
 from ..models.autoridades import Autoridad
 from ..models.exh_areas import ExhArea
 from ..models.exh_exhortos import ExhExhorto
-from ..models.exh_tipos_diligencias import ExhTipoDiligencia
 from ..models.exh_exhortos_partes import ExhExhortoParte
+from ..models.exh_tipos_diligencias import ExhTipoDiligencia
 from ..models.materias import Materia
+
+# from ..models.estados import Estado
 from ..models.municipios import Municipio
 from ..models.permisos import Permiso
-from ..schemas.exh_exhortos import ExhExhortoIn, ExhExhortoOut, OneExhExhortoOut, ExhExhortoPaginadoOut
+from ..schemas.exh_exhortos import ExhExhortoIn, ExhExhortoOut, ExhExhortoPaginadoOut, OneExhExhortoOut
 from ..schemas.exh_exhortos_partes import ExhExhortoParteOut
 
 exh_exhortos = APIRouter(prefix="/api/v5/exh_exhortos", tags=["exhortos"])
@@ -41,19 +37,28 @@ async def detalle(
     """Detalle de un exhorto a partir de su ID"""
     if current_user.permissions.get("EXH EXHORTOS", 0) < Permiso.VER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    # Consultar el exhorto
     exh_exhorto = database.query(ExhExhorto).get(exh_exhorto_id)
     if exh_exhorto is None:
         return OneExhExhortoOut(success=False, message="No existe ese exhorto")
     if exh_exhorto.estatus != "A":
         return OneExhExhortoOut(success=False, message="No es activo ese exhorto, está eliminado")
-    # Obtener las partes
-    exh_exhortos_partes = database.query(ExhExhortoParte).filter(ExhExhortoParte.exh_exhorto_id == exh_exhorto_id).all()
+
+    # Consultar las partes
+    exh_exhortos_partes = (
+        database.query(ExhExhortoParte)
+        .filter(ExhExhortoParte.exh_exhorto_id == exh_exhorto_id)
+        .filter(ExhExhortoParte.estatus == "A")
+        .all()
+    )
     if exh_exhortos_partes is None:
         return OneExhExhortoOut(success=False, message="No existen partes en este exhorto")
     partes = []
     for parte in exh_exhortos_partes:
         partes.append(ExhExhortoParteOut.model_validate(parte))
     exh_exhorto.exh_exhorto_partes = partes
+
     # Entregar
     return OneExhExhortoOut(
         success=True,
@@ -114,15 +119,24 @@ async def crear(
     if exh_area.estatus != "A":
         return OneExhExhortoOut(success=False, message="Ese área no está activa")
 
+    # Consultar el estado configurado
+    # estado = database.query(Estado).filter(Estado.clave == settings.ESTADO_CLAVE).first()
+    # if estado is None:
+    #     return OneExhExhortoOut(success=False, message="No existe el estado configurado o falta la clave INEGI")
+
     # Validar el municipio de origen
-    municipio_origen = database.query(Municipio).filter_by(clave = str(exh_exhorto_in.municipio_origen_id).zfill(3)).first()
+    # TODO: Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
+    # Se debe definir el registro correcto en la tabla de municipios
+    municipio_origen = database.query(Municipio).filter_by(clave=str(exh_exhorto_in.municipio_origen_id).zfill(3)).first()
     if municipio_origen is None:
         return OneExhExhortoOut(success=False, message="No existe ese municipio de origen")
     if municipio_origen.estatus != "A":
         return OneExhExhortoOut(success=False, message="Ese municipio está inactivo")
 
     # Validar el municipio de destino
-    municipio_destino = database.query(Municipio).filter_by(clave = str(exh_exhorto_in.municipio_destino_id).zfill(3)).first()
+    # TODO: Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
+    # Se debe definir el registro correcto en la tabla de municipios
+    municipio_destino = database.query(Municipio).filter_by(clave=str(exh_exhorto_in.municipio_destino_id).zfill(3)).first()
     if municipio_destino is None:
         return OneExhExhortoOut(success=False, message="No existe ese municipio de destino")
     if municipio_destino.estatus != "A":
@@ -147,27 +161,35 @@ async def crear(
         return OneExhExhortoOut(success=False, message='El tipo de diligencia con clave "OTR" no está activo')
 
     # Validar las Partes
+    partes = []  # Vamos a ir guardando las partes válidas
     for exh_exhorto_parte_in in exh_exhorto_in.exh_exhorto_partes:
         parte_nombre = safe_string(exh_exhorto_parte_in.nombre)
         if parte_nombre == "":
-            return OneExhExhortoOut(success=False, message='El nombre de una parte no es válido')
-        if exh_exhorto_parte_in.genero not in ExhExhortoParte.GENEROS:
-            return OneExhExhortoOut(success=False, message='El género de una parte no es válido')
+            return OneExhExhortoOut(success=False, message="El nombre de una parte no es válido")
         if exh_exhorto_parte_in.tipo_parte not in ExhExhortoParte.TIPOS_PARTES:
-            return OneExhExhortoOut(success=False, message='El tipo de parte de una parte no es válido')
+            return OneExhExhortoOut(success=False, message="El tipo de parte de una parte no es válido")
         if exh_exhorto_parte_in.es_persona_moral == False:
             parte_apellido_paterno = safe_string(exh_exhorto_parte_in.apellido_paterno)
             if parte_apellido_paterno == "":
-                return OneExhExhortoOut(success=False, message='El apellido paterno de una persona física no es válido o está vacío')
+                return OneExhExhortoOut(
+                    success=False, message="El apellido paterno de una persona física no es válido o está vacío"
+                )
             parte_apellido_materno = safe_string(exh_exhorto_parte_in.apellido_materno)
             if parte_apellido_materno == "":
-                return OneExhExhortoOut(success=False, message='El apellido materno de una persona física no es válido o está vacío')
+                return OneExhExhortoOut(
+                    success=False, message="El apellido materno de una persona física no es válido o está vacío"
+                )
+            if exh_exhorto_parte_in.genero not in ExhExhortoParte.GENEROS:
+                return OneExhExhortoOut(success=False, message="El género de una parte no es válido")
+        else:
+            parte_apellido_paterno = ""
+            exh_exhorto_parte_in.genero = "-"  # Como es persona moral, se pone el guion
         if exh_exhorto_parte_in.tipo_parte_nombre == 0:
             parte_nombre_parte = safe_string(exh_exhorto_parte_in.tipo_parte_nombre)
             if parte_nombre_parte == "":
-                return OneExhExhortoOut(success=False, message='El nombre de una parte no es válido y es necesario')
+                return OneExhExhortoOut(success=False, message="El nombre de una parte no es válido y es necesario")
 
-    # Crear el exhorto
+    # Insertar el exhorto
     exh_exhorto = ExhExhorto(
         autoridad_id=autoridad.id,
         exh_area_id=exh_area.id,
@@ -190,7 +212,7 @@ async def crear(
     database.commit()
     database.refresh(exh_exhorto)
 
-    # Crear las Partes
+    # Insertar las Partes
     for exh_exhorto_parte_in in exh_exhorto_in.exh_exhorto_partes:
         exh_exhorto_parte = ExhExhortoParte(
             exh_exhorto_id=exh_exhorto.id,
@@ -203,11 +225,14 @@ async def crear(
             tipo_parte_nombre=safe_string(exh_exhorto_parte_in.tipo_parte_nombre),
         )
         database.add(exh_exhorto_parte)
-    # Inserción de las partes
+
+    # Insertar las partes
     database.commit()
-    # Actualizar el resultado del exhorto
+
+    # Actualizar el exhorto
     database.refresh(exh_exhorto)
-    # Obtener las partes
+
+    # Consultar y elaborar el listado de las partes
     exh_exhortos_partes = database.query(ExhExhortoParte).filter(ExhExhortoParte.exh_exhorto_id == exh_exhorto.id).all()
     if exh_exhortos_partes is None:
         return OneExhExhortoOut(success=False, message="No existen partes en este exhorto")
