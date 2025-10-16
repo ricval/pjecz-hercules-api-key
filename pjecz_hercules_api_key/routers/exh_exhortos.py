@@ -19,7 +19,7 @@ from ..models.exh_exhortos_partes import ExhExhortoParte
 from ..models.exh_tipos_diligencias import ExhTipoDiligencia
 from ..models.materias import Materia
 
-# from ..models.estados import Estado
+from ..models.estados import Estado
 from ..models.municipios import Municipio
 from ..models.permisos import Permiso
 from ..schemas.exh_exhortos import ExhExhortoIn, ExhExhortoOut, ExhExhortoPaginadoOut, OneExhExhortoOut
@@ -120,23 +120,23 @@ async def crear(
         return OneExhExhortoOut(success=False, message="Ese área no está activa")
 
     # Consultar el estado configurado
-    # estado = database.query(Estado).filter(Estado.clave == settings.ESTADO_CLAVE).first()
-    # if estado is None:
-    #     return OneExhExhortoOut(success=False, message="No existe el estado configurado o falta la clave INEGI")
+    estado = database.query(Estado).filter(Estado.clave == settings.ESTADO_CLAVE).first()
+    if estado is None:
+        return OneExhExhortoOut(success=False, message="No existe el estado configurado o falta la clave INEGI")
 
     # Validar el municipio de origen
-    # TODO: Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
+    # Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
     # Se debe definir el registro correcto en la tabla de municipios
-    municipio_origen = database.query(Municipio).filter_by(clave=str(exh_exhorto_in.municipio_origen_id).zfill(3)).first()
+    municipio_origen = database.query(Municipio).join(Estado).filter(Municipio.clave==str(exh_exhorto_in.municipio_origen_id).zfill(3)).filter(Estado.clave == str(estado).zfill(2)).first()
     if municipio_origen is None:
         return OneExhExhortoOut(success=False, message="No existe ese municipio de origen")
     if municipio_origen.estatus != "A":
         return OneExhExhortoOut(success=False, message="Ese municipio está inactivo")
 
     # Validar el municipio de destino
-    # TODO: Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
+    # Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
     # Se debe definir el registro correcto en la tabla de municipios
-    municipio_destino = database.query(Municipio).filter_by(clave=str(exh_exhorto_in.municipio_destino_id).zfill(3)).first()
+    municipio_destino = database.query(Municipio).join(Estado).filter(Municipio.clave==str(exh_exhorto_in.municipio_destino_id).zfill(3)).filter(Estado.clave == str(estado)).first()
     if municipio_destino is None:
         return OneExhExhortoOut(success=False, message="No existe ese municipio de destino")
     if municipio_destino.estatus != "A":
