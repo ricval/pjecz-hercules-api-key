@@ -233,6 +233,11 @@ async def crear(
         # Añadir parte al listado de partes
         partes.append(parte)
 
+    # Validar Archivos
+    # TODO:
+    # archivos = []  # Vamos a ir guardando los archivos validados
+    # for exh_exhorto_archivo_in in exh_exhorto_in.exh_exhorto_archivos:
+
     # Insertar el exhorto
     exh_exhorto = ExhExhorto(
         autoridad_id=autoridad.id,
@@ -269,9 +274,11 @@ async def crear(
             tipo_parte_nombre=parte["tipo_parte_nombre"],
         )
         database.add(exh_exhorto_parte)
-
     # Insertar las partes
     database.commit()
+
+    # Insertar los Archivos
+    # TODO:
 
     # Consultar y elaborar el listado de las partes
     exh_exhortos_partes = database.query(ExhExhortoParte).filter(ExhExhortoParte.exh_exhorto_id == exh_exhorto.id).all()
@@ -281,6 +288,9 @@ async def crear(
     for parte in exh_exhortos_partes:
         partes.append(ExhExhortoParteOut.model_validate(parte))
     exh_exhorto.exh_exhorto_partes = partes
+
+    # Consultar y elaborar listado de los archivos
+    # TODO:
 
     # Entregar
     return OneExhExhortoOut(
