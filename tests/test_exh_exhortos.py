@@ -115,7 +115,6 @@ class TestExhExhortos(unittest.TestCase):
         # Definir valores random para los campos de un exhorto
         # Definir la materia
         # Consultar materias que tengan acceso a exhortos
-        materia = ""
         try:
             respuesta_materia = requests.get(
                 url=f"{config['api_base_url']}/api/v5/materias",
@@ -132,18 +131,14 @@ class TestExhExhortos(unittest.TestCase):
         contenido_materia = respuesta_materia.json()
         self.assertEqual(contenido_materia["success"], True)
         materias_data = contenido_materia["data"]
+        self.assertGreater(len(materias_data), 0)
         # Extraer listado de materias
-        materias = []
-        for materia_data in materias_data:
-            materias.append(materia_data["clave"])
-        self.assertGreater(len(materias), 0)
+        materias_num = faker.random_int(min=1, max=len(materias_data))
         # Selección de la materia de forma aleatoria del listado de materias
-        materia = faker.random_element(elements=materias)
+        materia = materias_data[materias_num - 1]["clave"]
 
         # Definir la autoridad
         # Consultar autoridades de la materia previamente seleccionada y que no estén extintos
-        autoridad_origen = ""
-        autoridad_destino = ""
         try:
             respuesta_autoridad = requests.get(
                 url=f"{config['api_base_url']}/api/v5/autoridades",
@@ -163,46 +158,74 @@ class TestExhExhortos(unittest.TestCase):
         autoridades_data = contenido_autoridad["data"]
         self.assertGreater(len(autoridades_data), 0)
         # Definir número aleatorio para las autoridades seleccionadas
-        autoridad_origen_num = faker.random_int(min=0, max=len(autoridades_data))
+        autoridad_origen_num = faker.random_int(min=1, max=len(autoridades_data))
         # Ciclo para evitar repeticiones de autoridades
         while True:
-            autoridad_destino_num = faker.random_int(min=0, max=len(autoridades_data))
+            autoridad_destino_num = faker.random_int(min=1, max=len(autoridades_data))
             if autoridad_destino_num != autoridad_origen_num:
                 break
         # Extraer datos del listado y asignarlos a la autoridad correspondiente
-        autoridad_origen = autoridades_data[autoridad_origen_num]["clave"]
-        autoridad_origen_nombre = autoridades_data[autoridad_origen_num]["descripcion"]
-        autoridad_destino = autoridades_data[autoridad_destino_num]["clave"]
+        autoridad_origen = autoridades_data[autoridad_origen_num - 1]["clave"]
+        autoridad_origen_municipio_id = autoridades_data[autoridad_origen_num - 1]["municipio_id"]
+        autoridad_origen_nombre = autoridades_data[autoridad_origen_num - 1]["descripcion"]
+        autoridad_destino = autoridades_data[autoridad_destino_num - 1]["clave"]
+        autoridad_destino_municipio_id = autoridades_data[autoridad_destino_num - 1]["municipio_id"]
 
-        # DEBUG:
-        # Extraer listado de materias
-        autoridades = []
-        for autoridad_data in autoridades_data:
-            autoridades.append(autoridad_data["clave"])
+        # Definir los municipios
+        # Consultar municipio_origen de la autoridad previamente seleccionada
+        try:
+            respuesta_municipio = requests.get(
+                url=f"{config['api_base_url']}/api/v5/municipios/{autoridad_origen_municipio_id}",
+                headers={"X-Api-Key": config["api_key"]},
+                timeout=config["timeout"],
+            )
+        except requests.exceptions.ConnectionError as error:
+            self.fail(error)
+        self.assertEqual(respuesta_municipio.status_code, 200)
+        # Revisar respuesta
+        contenido_municipio = respuesta_municipio.json()
+        self.assertEqual(contenido_municipio["success"], True)
+        municipio_data = contenido_municipio["data"]
+        self.assertGreater(len(municipio_data), 0)
+        # Asignar valor de la clave
+        municipio_origen_id_str = municipio_data["clave"]
+
+        # Consultar municipio_destino de la autoridad previamente seleccionada
+        try:
+            respuesta_municipio = requests.get(
+                url=f"{config['api_base_url']}/api/v5/municipios/{autoridad_destino_municipio_id}",
+                headers={"X-Api-Key": config["api_key"]},
+                timeout=config["timeout"],
+            )
+        except requests.exceptions.ConnectionError as error:
+            self.fail(error)
+        self.assertEqual(respuesta_municipio.status_code, 200)
+        # Revisar respuesta
+        contenido_municipio = respuesta_municipio.json()
+        self.assertEqual(contenido_municipio["success"], True)
+        municipio_data = contenido_municipio["data"]
+        self.assertGreater(len(municipio_data), 0)
+        # Asignar valor de la clave
+        municipio_destino_id_str = municipio_data["clave"]
+
 
         # Definir el exhorto
         exh_exhorto = {
             "autoridad_clave": autoridad_origen,
             "exh_area_clave": faker.random_element(elements=("TRC-OCP","SLT-OPC")),
-            "municipio_origen_id": 30,
-            "exhorto_origen_id": str(faker.pystr(min_chars=10, max_chars=10)).upper(),
-            "municipio_destino_id": 35,
+            "municipio_origen_id": municipio_origen_id_str,
+            "exhorto_origen_id": str(faker.pystr(min_chars=16, max_chars=16)).upper(),
+            "municipio_destino_id": municipio_destino_id_str,
             "materia_clave": materia,
             "juzgado_origen_id": autoridad_destino,
             "juzgado_origen_nombre": autoridad_origen_nombre,
             "numero_expediente_origen": f"{faker.random_int(min=1, max=999)}/2025",
             "tipo_juicio_asunto_delitos": "DIVORCIO",
             "fojas": faker.random_int(min=1, max=99),
-            "dias_responder": faker.random_int(min=1, max=31),
-            # "exh_exhorto_partes": [parte_actor, parte_demandado],
-            # "exh_exhorto_archivos": archivos,
-            "listado de autoridades": autoridades,
+            "dias_responder": faker.random_int(min=5, max=31),
+            "exh_exhorto_partes": [parte_actor, parte_demandado],
+            "exh_exhorto_archivos": archivos,
         }
-
-        # DEBUG:
-        salida = json.dumps(exh_exhorto, indent=4, ensure_ascii=False)
-        print(salida)
-        return None
 
         # Mandar el exhorto
         try:
