@@ -140,23 +140,63 @@ class TestExhExhortos(unittest.TestCase):
         # Selección de la materia de forma aleatoria del listado de materias
         materia = faker.random_element(elements=materias)
 
+        # Definir la autoridad
+        # Consultar autoridades de la materia previamente seleccionada y que no estén extintos
+        autoridad_origen = ""
+        autoridad_destino = ""
+        try:
+            respuesta_autoridad = requests.get(
+                url=f"{config['api_base_url']}/api/v5/autoridades",
+                headers={"X-Api-Key": config["api_key"]},
+                timeout=config["timeout"],
+                params= {
+                    "materia_clave": materia,
+                    "es_extinto": False
+                },
+            )
+        except requests.exceptions.ConnectionError as error:
+            self.fail(error)
+        self.assertEqual(respuesta_autoridad.status_code, 200)
+        # Extraer las claves de las autoridades
+        contenido_autoridad = respuesta_autoridad.json()
+        self.assertEqual(contenido_autoridad["success"], True)
+        autoridades_data = contenido_autoridad["data"]
+        self.assertGreater(len(autoridades_data), 0)
+        # Definir número aleatorio para las autoridades seleccionadas
+        autoridad_origen_num = faker.random_int(min=0, max=len(autoridades_data))
+        # Ciclo para evitar repeticiones de autoridades
+        while True:
+            autoridad_destino_num = faker.random_int(min=0, max=len(autoridades_data))
+            if autoridad_destino_num != autoridad_origen_num:
+                break
+        # Extraer datos del listado y asignarlos a la autoridad correspondiente
+        autoridad_origen = autoridades_data[autoridad_origen_num]["clave"]
+        autoridad_origen_nombre = autoridades_data[autoridad_origen_num]["descripcion"]
+        autoridad_destino = autoridades_data[autoridad_destino_num]["clave"]
+
+        # DEBUG:
+        # Extraer listado de materias
+        autoridades = []
+        for autoridad_data in autoridades_data:
+            autoridades.append(autoridad_data["clave"])
+
         # Definir el exhorto
         exh_exhorto = {
-            "autoridad_clave": "TRC-J1-FAM",
-            "exh_area_clave": "TRC-OCP",
+            "autoridad_clave": autoridad_origen,
+            "exh_area_clave": faker.random_element(elements=("TRC-OCP","SLT-OPC")),
             "municipio_origen_id": 30,
             "exhorto_origen_id": str(faker.pystr(min_chars=10, max_chars=10)).upper(),
             "municipio_destino_id": 35,
             "materia_clave": materia,
-            "juzgado_origen_id": "SLT-J1-FAM",
-            "juzgado_origen_nombre": "JUZGADO PRIMERO DE PRIMERA INSTANCIA DEL DISTRITO JUDICIAL DE SALTILLO",
+            "juzgado_origen_id": autoridad_destino,
+            "juzgado_origen_nombre": autoridad_origen_nombre,
             "numero_expediente_origen": f"{faker.random_int(min=1, max=999)}/2025",
             "tipo_juicio_asunto_delitos": "DIVORCIO",
             "fojas": faker.random_int(min=1, max=99),
             "dias_responder": faker.random_int(min=1, max=31),
             # "exh_exhorto_partes": [parte_actor, parte_demandado],
             # "exh_exhorto_archivos": archivos,
-            "materias": materias,
+            "listado de autoridades": autoridades,
         }
 
         # DEBUG:

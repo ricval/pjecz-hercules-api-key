@@ -50,6 +50,7 @@ async def paginado(
     distrito_clave: str = "",
     es_jurisdiccional: bool | None = None,
     es_notaria: bool | None = None,
+    es_extinto: bool | None = None,
     materia_clave: str = "",
 ):
     """Paginado de autoridades"""
@@ -66,6 +67,8 @@ async def paginado(
         consulta = consulta.filter(Autoridad.es_jurisdiccional == es_jurisdiccional)
     if es_notaria is not None:
         consulta = consulta.filter(Autoridad.es_notaria == es_notaria)
+    if es_extinto is not None:
+        consulta = consulta.filter(Autoridad.es_extinto == es_extinto)
     if materia_clave:
         try:
             materia_clave = safe_clave(materia_clave)
