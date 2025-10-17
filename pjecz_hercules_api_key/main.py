@@ -15,6 +15,7 @@ from .routers.listas_de_acuerdos import listas_de_acuerdos
 from .routers.materias import materias
 from .routers.materias_tipos_juicios import materias_tipos_juicios
 from .routers.modulos import modulos
+from .routers.municipios import municipios
 from .routers.permisos import permisos
 from .routers.roles import roles
 from .routers.sentencias import sentencias
@@ -48,6 +49,7 @@ app.include_router(listas_de_acuerdos)
 app.include_router(materias)
 app.include_router(materias_tipos_juicios)
 app.include_router(modulos)
+app.include_router(municipios)
 app.include_router(permisos)
 app.include_router(roles)
 app.include_router(sentencias)
