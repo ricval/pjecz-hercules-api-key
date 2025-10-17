@@ -47,6 +47,7 @@ async def paginado(
     current_user: Annotated[UsuarioInDB, Depends(get_current_active_user)],
     database: Annotated[Session, Depends(get_db)],
     en_sentencias: bool | None = None,
+    en_exh_exhortos: bool | None = None,
 ):
     """Paginado de materias"""
     if current_user.permissions.get("MATERIAS", 0) < Permiso.VER:
@@ -54,4 +55,6 @@ async def paginado(
     consulta = database.query(Materia)
     if en_sentencias is not None:
         consulta = consulta.filter(Materia.en_sentencias == en_sentencias)
+    if en_exh_exhortos is not None:
+        consulta = consulta.filter(Materia.en_exh_exhortos == en_exh_exhortos)
     return paginate(consulta.filter_by(estatus="A").order_by(Materia.nombre))

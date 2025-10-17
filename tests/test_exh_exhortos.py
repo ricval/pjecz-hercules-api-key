@@ -3,6 +3,7 @@ Unit tests for exh_exhortos
 """
 
 import unittest
+import json
 
 import requests
 from faker import Faker
@@ -111,24 +112,57 @@ class TestExhExhortos(unittest.TestCase):
             }
             archivos.append(archivo)
 
+        # Definir valores random para los campos de un exhorto
+        # Definir la materia
+        # Consultar materias que tengan acceso a exhortos
+        materia = ""
+        try:
+            respuesta_materia = requests.get(
+                url=f"{config['api_base_url']}/api/v5/materias",
+                headers={"X-Api-Key": config["api_key"]},
+                timeout=config["timeout"],
+                params= {
+                    "en_exh_exhortos": True
+                },
+            )
+        except requests.exceptions.ConnectionError as error:
+            self.fail(error)
+        self.assertEqual(respuesta_materia.status_code, 200)
+        # Extraer las claves de las materias
+        contenido_materia = respuesta_materia.json()
+        self.assertEqual(contenido_materia["success"], True)
+        materias_data = contenido_materia["data"]
+        # Extraer listado de materias
+        materias = []
+        for materia_data in materias_data:
+            materias.append(materia_data["clave"])
+        self.assertGreater(len(materias), 0)
+        # Selección de la materia de forma aleatoria del listado de materias
+        materia = faker.random_element(elements=materias)
 
         # Definir el exhorto
         exh_exhorto = {
             "autoridad_clave": "TRC-J1-FAM",
             "exh_area_clave": "TRC-OCP",
             "municipio_origen_id": 30,
-            "exhorto_origen_id": faker.pystr(min_chars=10, max_chars=10),
+            "exhorto_origen_id": str(faker.pystr(min_chars=10, max_chars=10)).upper(),
             "municipio_destino_id": 35,
-            "materia_clave": "FAM",
+            "materia_clave": materia,
             "juzgado_origen_id": "SLT-J1-FAM",
             "juzgado_origen_nombre": "JUZGADO PRIMERO DE PRIMERA INSTANCIA DEL DISTRITO JUDICIAL DE SALTILLO",
             "numero_expediente_origen": f"{faker.random_int(min=1, max=999)}/2025",
             "tipo_juicio_asunto_delitos": "DIVORCIO",
-            "fojas": 20,
-            "dias_responder": 30,
-            "exh_exhorto_partes": [parte_actor, parte_demandado],
-            "exh_exhorto_archivos": archivos,
+            "fojas": faker.random_int(min=1, max=99),
+            "dias_responder": faker.random_int(min=1, max=31),
+            # "exh_exhorto_partes": [parte_actor, parte_demandado],
+            # "exh_exhorto_archivos": archivos,
+            "materias": materias,
         }
+
+        # DEBUG:
+        salida = json.dumps(exh_exhorto, indent=4, ensure_ascii=False)
+        print(salida)
+        return None
 
         # Mandar el exhorto
         try:

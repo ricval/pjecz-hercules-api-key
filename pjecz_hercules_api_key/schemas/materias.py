@@ -12,6 +12,7 @@ class MateriaOut(BaseModel):
     nombre: str
     descripcion: str
     en_sentencias: bool
+    en_exh_exhortos: bool
     model_config = ConfigDict(from_attributes=True)
 
 
