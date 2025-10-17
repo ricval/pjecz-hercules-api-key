@@ -14,10 +14,12 @@ class ExhExhortoOut(BaseModel):
     id: int
     autoridad_clave: str
     exh_area_clave: str
-    municipio_origen_id: int
+    # municipio_origen_id: int
+    municipio_origen_clave: str
     municipio_origen_nombre: str
     exhorto_origen_id: str
-    municipio_destino_id: int
+    # municipio_destino_id: int
+    municipio_destino_clave: str
     municipio_destino_nombre: str
     materia_clave: str
     materia_nombre: str
@@ -40,10 +42,10 @@ class ExhExhortoPaginadoOut(BaseModel):
     id: int
     autoridad_clave: str
     exh_area_clave: str
-    municipio_origen_id: int
+    municipio_origen_clave: str
     municipio_origen_nombre: str
     exhorto_origen_id: str
-    municipio_destino_id: int
+    municipio_destino_clave: str
     municipio_destino_nombre: str
     materia_clave: str
     materia_nombre: str
@@ -69,9 +71,9 @@ class ExhExhortoIn(BaseModel):
 
     autoridad_clave: str
     exh_area_clave: str
-    municipio_origen_id: int
+    # municipio_origen_id: int
     exhorto_origen_id: str
-    municipio_destino_id: int
+    # municipio_destino_id: int
     materia_clave: str
     juzgado_origen_id: str
     juzgado_origen_nombre: str

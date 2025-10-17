@@ -14,7 +14,8 @@ class AutoridadOut(BaseModel):
     distrito_nombre_corto: str
     materia_clave: str
     materia_nombre: str
-    municipio_id: int
+    municipio_clave: str
+    municipio_nombre: str
     descripcion: str
     descripcion_corta: str
     es_extinto: bool

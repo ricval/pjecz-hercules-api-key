@@ -88,6 +88,16 @@ class Autoridad(Base, UniversalMixin):
     def materia_nombre(self):
         """Nombre de la materia"""
         return self.materia.nombre
+    
+    @property
+    def municipio_clave(self):
+        """Clave de la municipio"""
+        return self.municipio.clave
+    
+    @property
+    def municipio_nombre(self):
+        """Nombre de la municipio"""
+        return self.municipio.nombre
 
     def __repr__(self):
         """Representación"""

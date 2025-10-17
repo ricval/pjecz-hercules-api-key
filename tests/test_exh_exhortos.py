@@ -44,6 +44,7 @@ class TestExhExhortos(unittest.TestCase):
             self.assertEqual("autoridad_clave" in item, True)
             self.assertEqual("exhorto_origen_id" in item, True)
 
+
     def test_post_exh_exhortos(self):
         """Test POST method for exh_exhortos"""
 
@@ -166,58 +167,16 @@ class TestExhExhortos(unittest.TestCase):
                 break
         # Extraer datos del listado y asignarlos a la autoridad correspondiente
         autoridad_origen = autoridades_data[autoridad_origen_num - 1]["clave"]
-        autoridad_origen_municipio_id = autoridades_data[autoridad_origen_num - 1]["municipio_id"]
         autoridad_origen_nombre = autoridades_data[autoridad_origen_num - 1]["descripcion"]
         autoridad_destino = autoridades_data[autoridad_destino_num - 1]["clave"]
-        autoridad_destino_municipio_id = autoridades_data[autoridad_destino_num - 1]["municipio_id"]
-
-        # Definir los municipios
-        # Consultar municipio_origen de la autoridad previamente seleccionada
-        try:
-            respuesta_municipio = requests.get(
-                url=f"{config['api_base_url']}/api/v5/municipios/{autoridad_origen_municipio_id}",
-                headers={"X-Api-Key": config["api_key"]},
-                timeout=config["timeout"],
-            )
-        except requests.exceptions.ConnectionError as error:
-            self.fail(error)
-        self.assertEqual(respuesta_municipio.status_code, 200)
-        # Revisar respuesta
-        contenido_municipio = respuesta_municipio.json()
-        self.assertEqual(contenido_municipio["success"], True)
-        municipio_data = contenido_municipio["data"]
-        self.assertGreater(len(municipio_data), 0)
-        # Asignar valor de la clave
-        municipio_origen_id_str = municipio_data["clave"]
-
-        # Consultar municipio_destino de la autoridad previamente seleccionada
-        try:
-            respuesta_municipio = requests.get(
-                url=f"{config['api_base_url']}/api/v5/municipios/{autoridad_destino_municipio_id}",
-                headers={"X-Api-Key": config["api_key"]},
-                timeout=config["timeout"],
-            )
-        except requests.exceptions.ConnectionError as error:
-            self.fail(error)
-        self.assertEqual(respuesta_municipio.status_code, 200)
-        # Revisar respuesta
-        contenido_municipio = respuesta_municipio.json()
-        self.assertEqual(contenido_municipio["success"], True)
-        municipio_data = contenido_municipio["data"]
-        self.assertGreater(len(municipio_data), 0)
-        # Asignar valor de la clave
-        municipio_destino_id_str = municipio_data["clave"]
-
 
         # Definir el exhorto
         exh_exhorto = {
-            "autoridad_clave": autoridad_origen,
+            "autoridad_clave": autoridad_destino,
             "exh_area_clave": faker.random_element(elements=("TRC-OCP","SLT-OPC")),
-            "municipio_origen_id": municipio_origen_id_str,
             "exhorto_origen_id": str(faker.pystr(min_chars=16, max_chars=16)).upper(),
-            "municipio_destino_id": municipio_destino_id_str,
             "materia_clave": materia,
-            "juzgado_origen_id": autoridad_destino,
+            "juzgado_origen_id": autoridad_origen,
             "juzgado_origen_nombre": autoridad_origen_nombre,
             "numero_expediente_origen": f"{faker.random_int(min=1, max=999)}/2025",
             "tipo_juicio_asunto_delitos": "DIVORCIO",

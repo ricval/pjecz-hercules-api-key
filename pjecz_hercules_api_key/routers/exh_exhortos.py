@@ -46,7 +46,7 @@ async def detalle(
     if exh_exhorto.estatus != "A":
         return OneExhExhortoOut(success=False, message="No es activo ese exhorto, está eliminado")
 
-    # Consultar las partes activas (estatus == "B")
+    # Consultar las partes activas (estatus == "A")
     partes = []
     for parte in exh_exhorto.exh_exhortos_partes:
         if parte.estatus == "A":
@@ -125,35 +125,16 @@ async def crear(
     if estado is None:
         return OneExhExhortoOut(success=False, message="No existe el estado configurado o falta la clave INEGI")
 
-    # Validar el municipio de origen
-    # Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
-    # Se debe definir el registro correcto en la tabla de municipios
-    municipio_origen = (
-        database.query(Municipio)
-        .join(Estado)
-        .filter(Municipio.clave == str(exh_exhorto_in.municipio_origen_id).zfill(3))
-        .filter(Estado.clave == estado.clave)
-        .first()
-    )
-    if municipio_origen is None:
-        return OneExhExhortoOut(success=False, message=f"No existe ese municipio de origen ({estado.clave})")
-    if municipio_origen.estatus != "A":
-        return OneExhExhortoOut(success=False, message="Ese municipio está inactivo")
-
-    # Validar el municipio de destino
-    # Se recibe un entero de 1 a 3 dígitos, con la clave INEGI del municipio de Coahuila
-    # Se debe definir el registro correcto en la tabla de municipios
-    municipio_destino = (
-        database.query(Municipio)
-        .join(Estado)
-        .filter(Municipio.clave == str(exh_exhorto_in.municipio_destino_id).zfill(3))
-        .filter(Estado.clave == estado.clave)
-        .first()
-    )
-    if municipio_destino is None:
-        return OneExhExhortoOut(success=False, message="No existe ese municipio de destino")
-    if municipio_destino.estatus != "A":
-        return OneExhExhortoOut(success=False, message="Ese municipio está inactivo")
+    # Validar el juzgado_origen_id
+    try:
+        juzgado_origen_clave = safe_clave(exh_exhorto_in.juzgado_origen_id)
+    except ValueError:
+        return OneExhExhortoOut(success=False, message="No es válida la clave del juzgado_origen_id")
+    juzgado_origen = database.query(Autoridad).filter(Autoridad.clave == juzgado_origen_clave).first()
+    if juzgado_origen is None:
+        return OneExhExhortoOut(success=False, message="No existe ese juzgado_origen")
+    if juzgado_origen.estatus != "A":
+        return OneExhExhortoOut(success=False, message="Ese juzgado_origen no está activo")
 
     # Validar la materia
     try:
@@ -263,13 +244,13 @@ async def crear(
         autoridad_id=autoridad.id,
         exh_area_id=exh_area.id,
         exh_tipo_diligencia_id=exh_tipo_diligencia.id,
-        municipio_origen_id=municipio_origen.id,
+        municipio_origen_id=juzgado_origen.municipio.id,
         exhorto_origen_id=exh_exhorto_in.exhorto_origen_id,
-        municipio_destino_id=municipio_destino.id,
+        municipio_destino_id=autoridad.municipio.id,
         materia_clave=materia.clave,
         materia_nombre=materia.nombre,
-        juzgado_origen_id=exh_exhorto_in.juzgado_origen_id,
-        juzgado_origen_nombre=exh_exhorto_in.juzgado_origen_nombre,
+        juzgado_origen_id=juzgado_origen.municipio_clave,
+        juzgado_origen_nombre=juzgado_origen.municipio_nombre,
         numero_expediente_origen=exh_exhorto_in.numero_expediente_origen,
         tipo_juicio_asunto_delitos=exh_exhorto_in.tipo_juicio_asunto_delitos,
         fojas=exh_exhorto_in.fojas,

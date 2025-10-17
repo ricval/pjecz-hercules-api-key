@@ -115,14 +115,24 @@ class ExhExhorto(Base, UniversalMixin):
         return self.exh_area.clave
 
     @property
+    def municipio_origen_clave(self):
+        """Regresa el clave del municipio de origen"""
+        return self.municipio_origen.clave
+
+    @property
     def municipio_origen_nombre(self):
         """Regresa el nombre del municipio de origen"""
         return self.municipio_origen.nombre
 
     @property
+    def municipio_destino_clave(self):
+        """Regresa la clave del municipio de destino"""
+        return self.autoridad.municipio.clave
+    
+    @property
     def municipio_destino_nombre(self):
         """Regresa el nombre del municipio de destino"""
-        return "DEBE SER CONSULTADO EXTERNAMENTE"
+        return self.autoridad.municipio.nombre
 
     def __repr__(self):
         """Representación"""
